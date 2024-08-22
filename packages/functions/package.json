@@ -1,0 +1,12 @@
+{
+  "name": "@td/functions",
+  "version": "1.0.0",
+  "main": "src/index.ts",
+  "type":"module",
+  "private": true,
+  "license": "MIT",
+  "devDependencies": {},
+  "dependencies": {
+    "typescript": "^5.4.5"
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "name": "@td/types",
+  "version": "1.0.0",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "private": true,
+  "license": "MIT",
+  "devDependencies": {},
+  "dependencies": {
+    "typescript": "^5.4.5"
+  }
+}
