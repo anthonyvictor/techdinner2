@@ -1,13 +1,11 @@
-import { Avail } from "@td/types";
+import { Avail, DaysPeriod, HourPeriod } from "@td/types";
 import { isDate } from "date-fns";
 import moment from "moment";
+import { DatePeriod } from "@td/types";
+import { getCurrentWorkingHour, isInCurrentWorkingHour } from ".";
+import { DayOfWeekNum } from "@td/types/src/days";
 
-export const getAvailability = (avails: Avail[]) => {
-  let requirements = {
-    customer: true,
-    user: true,
-  };
-
+export const getAvailability = (avails: Avail[], to: "customer" | "user") => {
   type Response = {
     customer: "hidden" | "enabled" | "disabled";
     user: "hidden" | "enabled" | "disabled";
@@ -48,16 +46,67 @@ export const getAvailability = (avails: Avail[]) => {
   };
 
   const applyAvailStatus = (avails: Avail[], to: "customer" | "user") => {
-    const avail = avails.find(
-      (x) =>
-        x.to === to &&
-        (!x.until || x.until > new Date()) &&
-        ((x.at.length &&
-          Array.isArray(x.at) &&
-          (typeof x.at[0] === "string" || moment(x.at[0]).isValid()) &&
-          getDateEquals(x.at)) ||
-          !Array.isArray(x.at))
-    );
+    const avail = avails.find((x) => {
+      const sameTo = x.to === to;
+      const beforeUntil = !x.until || x.until > new Date();
+
+      const isHourPeriod = (x: any) => !isNaN(x?.from?.h);
+      const isDatePeriod = (x: any) => moment(x?.from).isValid();
+      const isDaysPeriod = (x: any) => !!x?.days?.length;
+      const isDate = (x: any) => moment(x.at[0]).isValid();
+
+      const isNow = (x: any) => x === "now";
+      const isDefault = (x: any) => x === "*";
+
+      const isInPeriod = (
+        xx: (HourPeriod | DatePeriod | DaysPeriod | Date)[]
+      ) => {
+        const avails = xx.map((x) => {
+          const now = new Date();
+
+          if (isDate(x)) {
+            const _x = x as Date;
+            return isInCurrentWorkingHour(_x);
+          } else if (isHourPeriod(x)) {
+            const _x = x as HourPeriod;
+            return (
+              now.getHours() >= _x.from.h &&
+              now.getHours() <= _x.until.h &&
+              now.getMinutes() >= _x.from.m &&
+              now.getMinutes() <= _x.until.m
+            );
+          } else if (isDatePeriod(x)) {
+            const _x = x as DatePeriod;
+            const { start: todaysStart, end: todaysEnd } =
+              getCurrentWorkingHour();
+            return todaysStart >= _x.from && todaysEnd <= _x.until;
+          } else if (isDaysPeriod(x)) {
+            const _x = x as DaysPeriod;
+            return _x.days.some((d) => {
+              const day = DayOfWeekNum[now.getDay()];
+              return d === day;
+            });
+          } else {
+            return false;
+          }
+        });
+        return avails.some(Boolean);
+      };
+
+      // ((x.at.length &&
+      //   Array.isArray(x.at) &&
+      //   (typeof x.at[0] === "string" || isDatePeriod(x.at[0]) || isDaysPeriod(x.at[0]) || isHourPeriod(x.at[0]) ||moment(x.at[0]).isValid()) &&
+      //   getDateEquals(x.at)) ||
+      //   !Array.isArray(x.at))
+
+      return (
+        sameTo &&
+        beforeUntil &&
+        (isDefault(x.at) ||
+          isNow(x.at) ||
+          isInPeriod(x.at as (HourPeriod | DatePeriod | DaysPeriod | Date)[]))
+      );
+    });
     if (avail) {
       r.customer = avail.is;
     }
@@ -81,4 +130,62 @@ export const getAvailability = (avails: Avail[]) => {
   }
 
   return r;
+};
+
+export const isAvailable = (avails: Avail[], to: "customer" | "user" | "*") => {
+  const is = avails.some((x) => {
+    const sameTo = x.to === to || x.to === "*";
+    const beforeUntil = !x.until || x.until > new Date();
+
+    const isHourPeriod = (x: any) => !isNaN(x?.from?.h);
+    const isDatePeriod = (x: any) => moment(x?.from).isValid();
+    const isDaysPeriod = (x: any) => !!x?.days?.length;
+    const isDate = (x: any) => moment(x.at[0]).isValid();
+
+    const isNow = (x: any) => x === "now";
+    const isDefault = (x: any) => x === "*";
+
+    const isInPeriod = (
+      xx: (HourPeriod | DatePeriod | DaysPeriod | Date)[]
+    ) => {
+      const avails = xx.map((x) => {
+        const now = new Date();
+
+        if (isDate(x)) {
+          const _x = x as Date;
+          return isInCurrentWorkingHour(_x);
+        } else if (isHourPeriod(x)) {
+          const _x = x as HourPeriod;
+          return (
+            now.getHours() >= _x.from.h &&
+            now.getHours() <= _x.until.h &&
+            now.getMinutes() >= _x.from.m &&
+            now.getMinutes() <= _x.until.m
+          );
+        } else if (isDatePeriod(x)) {
+          const _x = x as DatePeriod;
+          const { start: todaysStart, end: todaysEnd } =
+            getCurrentWorkingHour();
+          return todaysStart >= _x.from && todaysEnd <= _x.until;
+        } else if (isDaysPeriod(x)) {
+          const _x = x as DaysPeriod;
+          return _x.days.some((d) => {
+            const day = DayOfWeekNum[now.getDay()];
+            return d === day;
+          });
+        } else {
+          return false;
+        }
+      });
+      return avails.some(Boolean);
+    };
+    return (
+      sameTo &&
+      beforeUntil &&
+      (isDefault(x.at) ||
+        isNow(x.at) ||
+        isInPeriod(x.at as (HourPeriod | DatePeriod | DaysPeriod | Date)[]))
+    );
+  });
+  return is;
 };

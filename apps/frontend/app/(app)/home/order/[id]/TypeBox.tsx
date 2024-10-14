@@ -1,7 +1,7 @@
 import { useHome } from "@/app/context/Home"
 import { Color } from "@/app/infra/types/color"
 import { Flex, SegmentedControl, Select, Text } from "@radix-ui/themes"
-import { IOrderPlatform } from "@td/types"
+import { IOrderPlatform, IOrderType } from "@td/types"
 import { IconType } from "react-icons"
 import {
   FaHome,
@@ -14,7 +14,16 @@ import {
 import { MdRoomService } from "react-icons/md"
 
 export const TypeBox = () => {
-  const { currentOrder, setPlatform } = useHome()
+  const {
+    currentOrder: currOrderId,
+    getCurrentOrder,
+    setPlatform,
+    setType,
+  } = useHome()
+
+  const currentOrder = currOrderId ? getCurrentOrder() : undefined
+
+  if (!currentOrder) return <></>
 
   const platforms: {
     label: string
@@ -41,14 +50,15 @@ export const TypeBox = () => {
     },
   ]
 
-  if (!currentOrder?.id) return <></>
-
   return (
     <Flex gap="2" align={"center"}>
       <SegmentedControl.Root
         size={"3"}
         radius="full"
-        defaultValue={currentOrder.type ?? ""}
+        value={currentOrder.type}
+        aria-disabled={!currentOrder.customer}
+        className="aria-disabled:opacity-50 aria-disabled:pointer-events-none"
+        onValueChange={(e) => setType(e as IOrderType)}
       >
         <SegmentedControl.Item value="withdraw">
           <Flex className="gap-1 md:gap-0 md:flex-col items-center justify-center">
@@ -75,6 +85,7 @@ export const TypeBox = () => {
         value={currentOrder.platform ?? "0"}
         onValueChange={(e) => {
           if (e !== "0") {
+            // console.log(e)
             setPlatform(e as IOrderPlatform)
           }
         }}

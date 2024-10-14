@@ -15,7 +15,7 @@ export class OrdersService extends BaseService<IOrder> {
     const data = _data;
     return data;
   }
-  async findOne(id: string): Promise<IOrder | undefined> {
+  async findOne(): Promise<IOrder | undefined> {
     throw new Error("Method not implemented.");
   }
   async createOne({
@@ -25,19 +25,14 @@ export class OrdersService extends BaseService<IOrder> {
     description,
     address: _address,
     items: _items,
+    items: _payments,
     platform: _platform,
     type: _type,
   }: OrdersPostDTO): Promise<IOrder> {
-    const itemsService = this.modules?.find((x) => x.name === "items")?.service;
-
     const address = _type !== "withdraw" ? _address : undefined;
     const type = address ? "delivery" : _type;
 
-    const items = (
-      _items ? await itemsService?.createMany(_items) : []
-    ) as IOrderItem[];
-    // const payments = (_payments ? await paymentsService?.createMany(_payments) : []) as IOrderPayment[];
-
+    const items: IOrderItem[] = [];
     const payments: IOrderPayment[] = [];
     const prints = 0;
     const status: IOrderStatus = "going";
@@ -62,6 +57,25 @@ export class OrdersService extends BaseService<IOrder> {
     const orders = await this.repo.findAll();
 
     const data = { ..._data, number: orders.length };
+
+    if (_items?.length) {
+      const itemsService = this.modules?.find(
+        (x) => x.name === "items"
+      )?.service;
+      if (itemsService) {
+        const items = (await itemsService?.createMany(
+          _items.map((x) => ({ ...x, orderId: data.id }))
+        )) as IOrderItem[];
+
+        data.items = items;
+      }
+    }
+    if (_payments?.length) {
+      // const paymentsService = this.modules?.find((x) => x.name === "payments")?.service;
+      // if(paymentsService){
+      // const payments = ( await paymentsService?.createMany(_payments.map(x => ({...x, orderId: data.id}))) ) as IOrderPayment[];
+      // }
+    }
 
     return data;
   }

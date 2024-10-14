@@ -1,3 +1,5 @@
+"use client"
+import { MyAvatar } from "@/app/components/MyAvatar"
 import { useHome } from "@/app/context/Home"
 import { Avatar, Badge, Box, Card, Flex, Text } from "@radix-ui/themes"
 import {
@@ -6,8 +8,10 @@ import {
   getPaymentStatus,
   getPrintStatus,
   getType,
+  initials,
 } from "@td/functions"
 import { IOrder } from "@td/types"
+import { useEffect, useState } from "react"
 import { IconBase } from "react-icons"
 import { BiPrinter } from "react-icons/bi"
 import { FaPause } from "react-icons/fa"
@@ -26,6 +30,22 @@ export const Order = ({ order }: { order: IOrder }) => {
   const somePaused = itemsWithSteps.some((x) => x.pausedUntil)
 
   const { openOrder } = useHome()
+
+  const [duration, setDuration] = useState(getDuration(order?.createdAt))
+
+  useEffect(() => {
+    let inteval: NodeJS.Timeout
+
+    if (order) {
+      setInterval(() => {
+        setDuration(getDuration(order.createdAt))
+      }, 1000 * 60)
+    }
+    return () => {
+      clearInterval(inteval)
+    }
+  }, []) //eslint-disable-line
+
   return (
     <Card
       asChild
@@ -42,12 +62,11 @@ export const Order = ({ order }: { order: IOrder }) => {
       <button onClick={() => openOrder(order)}>
         <Flex gap="2" align={"center"} className="justify-stretch">
           <Box className="relative">
-            <Avatar
+            <MyAvatar
               size="2"
               src={order.customer?.imageUrl ?? ""}
               radius="large"
-              fetchPriority="high"
-              fallback={order.customer?.initials ?? "CD"}
+              fallback={initials(order.customer, "CD")}
             />
             {(() => {
               const { emoji1, color, icon: Icon } = getType(order)
@@ -80,10 +99,9 @@ export const Order = ({ order }: { order: IOrder }) => {
             </Text>
             <Flex gap="2" align={"center"}>
               {(() => {
-                const { color, formattedValue } = getDuration(order.createdAt)
                 return (
-                  <Text size={"1"} color={color}>
-                    {formattedValue}
+                  <Text size={"1"} color={duration?.color}>
+                    {duration?.formattedValue}
                   </Text>
                 )
               })()}

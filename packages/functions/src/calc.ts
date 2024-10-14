@@ -1,6 +1,6 @@
 export const getDiscountValue = (value: number, discount?: string) => {
   if (!discount) return 0;
-  const d = Number(discount.replace(/[^0-9]/g, ""));
+  const d = Number(discount.replace(/[^0-9,.]/g, ""));
   return discount.includes("%") ? value * (d / 100) : d;
 };
 

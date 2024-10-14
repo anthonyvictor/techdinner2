@@ -1,5 +1,5 @@
 import { usePizzaBuilder } from "@/app/context/itemBuilder/Pizza"
-import { Button, Card, Dialog, Flex, Grid, Text } from "@radix-ui/themes"
+import { Card, Flex, Grid, Text } from "@radix-ui/themes"
 import {
   currency,
   getPizzaValue,
@@ -10,21 +10,15 @@ import {
 } from "@td/functions"
 import { ModalBottom } from "../../ModalBottom"
 import { applyDiscount, getDiscountValue } from "@td/functions/src/calc"
-import { useHome } from "@/app/context/Home"
-import {
-  IBuildingPizza,
-  IBuildingPizzaFlavor,
-  IOrderItem,
-  IPizzaSize,
-} from "@td/types"
+import { IBuildingPizza, IOrderItem } from "@td/types"
 import { z, ZodError } from "zod"
 import { errorToast } from "@/app/util/functions/toast"
-import { ContrDialog, useContrDialog } from "../../ControlledDialog"
 import { useState } from "react"
+import { Divide } from "./Divide"
+import { useContrDialog } from "../../ControlledDialog"
 
 export const Bottom = () => {
-  const { currentPizza, nextButtonRef } = usePizzaBuilder()
-  const { addMultipleItems } = useHome()
+  const { currentPizza, nextButtonRef, addMultipleItems } = usePizzaBuilder()
   const [divideModalOpen, setDivideModalOpen] = useState(false)
   const { setOpen } = useContrDialog()
 
@@ -51,46 +45,7 @@ export const Bottom = () => {
     currentPizza.discount,
   )
 
-  const dividePizza = async () => {
-    setDivideModalOpen(false)
-    const basePizza = currentPizza as Required<IBuildingPizza>
-
-    const orderId = basePizza?.id
-      ? (basePizza as IOrderItem)?.orderId ?? ""
-      : ""
-
-    const flavorsGroups: IBuildingPizzaFlavor[][] = []
-
-    currentPizza.flavors.forEach((flavor) => {
-      const fg = [...flavorsGroups]
-      let added = false
-      fg.forEach((flavors) => {
-        if (flavors.length < (currentPizza.size as IPizzaSize).maxflavors) {
-          flavors.push(flavor)
-          added = true
-        } else {
-          flavorsGroups.push([flavor])
-          added = true
-        }
-      })
-
-      if (!added) flavorsGroups.push([flavor])
-    })
-
-    const pizzas: IOrderItem[] = flavorsGroups.map((flavors) => ({
-      type: "pizza",
-      ...basePizza,
-      flavors,
-      id: "",
-      orderId,
-      initialValue: getPizzaValue(currentPizza),
-    }))
-
-    addMultipleItems(pizzas)
-
-    setOpen(false)
-  }
-  const savePizza = async () => {
+  const save = async () => {
     setDivideModalOpen(false)
     const basePizza = currentPizza as Required<IBuildingPizza>
     const orderId = basePizza?.id
@@ -103,8 +58,10 @@ export const Bottom = () => {
       orderId,
       initialValue: getPizzaValue(currentPizza),
     }
+
+    await addMultipleItems([pizza])
     // await addOrUpdateItem(pizza)
-    // setOpen(false)
+    setOpen(false)
   }
   return (
     <Flex direction={"column"} gap="2">
@@ -164,8 +121,10 @@ export const Bottom = () => {
               </Text>
             </>
           )}
-          <Text>Total:</Text>
-          <Text align={"right"}>
+          <Text weight={"bold"} color="orange">
+            Preço:
+          </Text>
+          <Text align={"right"} weight={"bold"} color="orange">
             {currency(
               applyDiscount(getPizzaValue(currentPizza), currentPizza.discount),
             )}
@@ -178,32 +137,47 @@ export const Bottom = () => {
         nextRef={nextButtonRef}
         beforeNext={() => {
           try {
-            const pizzaSchema = z.object({
-              size: z
-                .object(
-                  {
-                    id: z
-                      .string({ required_error: "Selecione o tamanho" })
-                      .min(1, "Selecione o tamanho"),
-                  },
-                  {
-                    required_error: "Selecione o tamanho",
-                    invalid_type_error: "Selecione o tamanho",
-                  },
-                )
-                .required(),
-              flavors: z
-                .array(
-                  z.object({
-                    id: z.string({
-                      required_error: "Insira pelo menos um sabor",
+            const schema = z
+              .object({
+                size: z
+                  .object(
+                    {
+                      id: z
+                        .string({ required_error: "Selecione o tamanho" })
+                        .min(1, "Selecione o tamanho"),
+                    },
+                    {
+                      required_error: "Selecione o tamanho",
+                      invalid_type_error: "Selecione o tamanho",
+                    },
+                  )
+                  .required(),
+                flavors: z
+                  .array(
+                    z.object({
+                      id: z.string({
+                        required_error: "Insira pelo menos um sabor",
+                      }),
                     }),
-                  }),
-                )
-                .min(1, { message: "Insira pelo menos um sabor" }),
-            })
+                  )
+                  .min(1, { message: "Insira pelo menos um sabor" }),
+                discount: z.string().optional(),
+              })
+              .refine(
+                () => {
+                  if (
+                    applyDiscount(
+                      getPizzaValue(currentPizza),
+                      currentPizza.discount,
+                    ) < 0
+                  )
+                    return false
+                  return true
+                },
+                { message: "Valor final não pode ser menor que zero!" },
+              )
 
-            pizzaSchema.parse(currentPizza)
+            schema.parse(currentPizza)
 
             if (
               !(currentPizza as IOrderItem)?.orderId &&
@@ -222,37 +196,13 @@ export const Bottom = () => {
             return false
           }
         }}
-        onNext={savePizza}
+        onNext={save}
       />
 
-      <ContrDialog open={divideModalOpen} setOpen={setDivideModalOpen}>
-        <Dialog.Content>
-          <Dialog.Title>
-            Quantidade de sabores maior do que o tamanho aceita
-          </Dialog.Title>
-          <Dialog.Description>
-            Deseja dividir a pizza? Ou quer manter os sabores escolhidos em uma
-            pizza só?
-          </Dialog.Description>
-          <Flex gap={"2"} py={"2"}>
-            <Dialog.Close onClick={() => setDivideModalOpen(false)}>
-              <Button color="red" variant="outline" size={"3"}>
-                <Text>Voltar</Text>
-              </Button>
-            </Dialog.Close>
-            <Dialog.Close onClick={savePizza}>
-              <Button color="blue" size={"3"}>
-                <Text>Manter</Text>
-              </Button>
-            </Dialog.Close>
-            <Dialog.Close onClick={dividePizza} tabIndex={0}>
-              <Button size={"3"} tabIndex={0}>
-                <Text>Dividir</Text>
-              </Button>
-            </Dialog.Close>
-          </Flex>
-        </Dialog.Content>
-      </ContrDialog>
+      <Divide
+        divideModalOpen={divideModalOpen}
+        setDivideModalOpen={setDivideModalOpen}
+      />
     </Flex>
   )
 }

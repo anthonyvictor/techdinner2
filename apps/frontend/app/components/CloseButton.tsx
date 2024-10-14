@@ -1,9 +1,9 @@
-import { ButtonProps, IconButton } from "@radix-ui/themes";
-import { MutableRefObject } from "react";
-import { CgClose } from "react-icons/cg";
+import { ButtonProps, IconButton } from "@radix-ui/themes"
+import { CgClose } from "react-icons/cg"
+import { Ref } from "../infra/types/ref"
 
 export const CloseButton = (
-  props: ButtonProps & { ref?: MutableRefObject<HTMLButtonElement | undefined> }
+  props: ButtonProps & { ref?: Ref<HTMLButtonElement | undefined> },
 ) => {
   return (
     <IconButton
@@ -13,5 +13,5 @@ export const CloseButton = (
     >
       <CgClose />
     </IconButton>
-  );
-};
+  )
+}

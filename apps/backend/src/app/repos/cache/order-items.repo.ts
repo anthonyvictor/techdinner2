@@ -2,6 +2,7 @@ import { IBuildingPizza, IBuildingPizzaFlavor, IOrderItem } from "@td/types";
 import { BaseRepository } from "@/src/infra/classes/BaseRepository";
 import { orders } from "@/src/data/orders";
 import { OrderItemsGetDTO } from "@/src/infra/types/dto/order-items";
+import { DTO } from "@/src/infra/types/dto";
 
 export class OrderItemsCacheRepo extends BaseRepository<IOrderItem> {
   constructor() {
@@ -14,7 +15,7 @@ export class OrderItemsCacheRepo extends BaseRepository<IOrderItem> {
 
     return data;
   }
-  async findOne(id: string): Promise<IOrderItem | undefined> {
+  async findOne({ id }: DTO): Promise<IOrderItem | undefined> {
     const data = orders
       .map((x) => x.items)
       .flat()

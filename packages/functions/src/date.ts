@@ -1,4 +1,7 @@
-export const getDuration = (_date: Date) => {
+import { dateTimeReviver } from ".";
+
+export const getDuration = (_date?: Date) => {
+  if (!_date) return undefined;
   const now = new Date();
   const date = new Date(_date);
 
@@ -88,3 +91,9 @@ export const isInCurrentWorkingHour = (_date: Date) => {
 
   return _date >= start && _date <= end;
 };
+
+export function parseDate<T>(obj: any) {
+  const _data = JSON.stringify(obj);
+  const data = JSON.parse(_data, dateTimeReviver) as unknown as T;
+  return data;
+}

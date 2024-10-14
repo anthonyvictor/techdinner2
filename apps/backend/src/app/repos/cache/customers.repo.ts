@@ -11,7 +11,7 @@ export class CustomersCacheRepo extends BaseRepository<ICustomer> {
     const data = Object.values(customers);
     return data;
   }
-  async findOne(id: string): Promise<ICustomer | undefined> {
+  async findOne({ id }: DTO): Promise<ICustomer | undefined> {
     const data = Object.values(customers);
     return data.find((x) => x.id === id);
   }

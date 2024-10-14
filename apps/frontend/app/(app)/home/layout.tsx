@@ -1,14 +1,14 @@
-"use client";
-import { HomeProvider, useHome } from "@/app/context/Home";
-import { Card, Flex } from "@radix-ui/themes";
+"use client"
+import { HomeProvider, useHome } from "@/app/context/Home"
+import { Card, Flex } from "@radix-ui/themes"
 
-import { OrderList } from "./List";
-import { ItemsPanel } from "./itemsPanel/ItemsPanel";
+import { OrderList } from "./List"
+import { ItemsPanel } from "./itemsPanel/ItemsPanel"
 
 export default function RootLayout({
   children,
 }: Readonly<{
-  children: React.ReactNode;
+  children: React.ReactNode
 }>) {
   return (
     <HomeProvider>
@@ -17,16 +17,17 @@ export default function RootLayout({
         <MainContent>{children}</MainContent>
       </div>
     </HomeProvider>
-  );
+  )
 }
 
 const MainContent = ({ children }: { children: React.ReactNode }) => {
-  const { currentOrder } = useHome();
+  const { currentOrder, addMultipleItems } = useHome()
 
+  // max-h-full min-h-0 ${currentOrder?.id ? "" : "max-sm:hidden"} `}
   return (
     <div
       className={`flex flex-1 h-full
-        max-h-full min-h-0 ${currentOrder?.id ? "" : "max-sm:hidden"} `}
+        max-h-full min-h-0 ${currentOrder ? "" : "max-sm:hidden"} `}
     >
       <Card
         className="w-full"
@@ -34,11 +35,15 @@ const MainContent = ({ children }: { children: React.ReactNode }) => {
       >
         <div className="h-full w-full flex">
           <div className={`flex-1 hidden md:flex`}>
-            <ItemsPanel />
+            <ItemsPanel
+              orderId={currentOrder ?? ""}
+              addMultipleItems={addMultipleItems}
+            />
           </div>
-          {!!currentOrder?.id && children}
+          {/* {!!currentOrder?.id && children} */}
+          {!!currentOrder && children}
         </div>
       </Card>
     </div>
-  );
-};
+  )
+}

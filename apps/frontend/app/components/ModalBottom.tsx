@@ -1,13 +1,7 @@
-import {
-  AlertDialog,
-  Button,
-  Dialog,
-  Flex,
-  IconButton,
-} from "@radix-ui/themes";
-import { MutableRefObject, ReactNode, RefObject } from "react";
-import { CgClose } from "react-icons/cg";
-import { useContrDialog } from "./ControlledDialog";
+import { Button, Flex, IconButton } from "@radix-ui/themes"
+import { CgClose } from "react-icons/cg"
+import { useContrDialog } from "./ControlledDialog"
+import { Ref } from "../infra/types/ref"
 
 export const ModalBottom = ({
   type,
@@ -16,13 +10,13 @@ export const ModalBottom = ({
   beforeNext,
   onNext,
 }: {
-  type: "dialog" | "alert";
-  nextRef: MutableRefObject<HTMLButtonElement | undefined>;
-  beforeCancel?: () => boolean;
-  beforeNext?: () => boolean;
-  onNext?: () => void;
+  type: "dialog" | "alert"
+  nextRef: Ref<HTMLButtonElement | undefined>
+  beforeCancel?: () => boolean
+  beforeNext?: () => boolean
+  onNext?: () => void
 }) => {
-  const { setOpen } = useContrDialog();
+  const { setOpen } = useContrDialog()
 
   return (
     <Flex gap="2" justify={"center"}>
@@ -32,7 +26,7 @@ export const ModalBottom = ({
         size={"3"}
         onClick={() => {
           if ((beforeCancel && beforeCancel()) || !beforeCancel) {
-            setOpen(false);
+            setOpen(false)
           }
         }}
       >
@@ -42,16 +36,16 @@ export const ModalBottom = ({
         color="green"
         size={"3"}
         className="flex-1"
-        ref={nextRef as RefObject<HTMLButtonElement>}
+        ref={nextRef as Ref<HTMLButtonElement>}
         onClick={() => {
           if ((beforeNext && beforeNext()) || !beforeNext) {
-            onNext?.();
-            setOpen(false);
+            onNext?.()
+            setOpen(false)
           }
         }}
       >
         Avançar
       </Button>
     </Flex>
-  );
-};
+  )
+}

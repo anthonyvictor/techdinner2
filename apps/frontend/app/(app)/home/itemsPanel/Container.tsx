@@ -1,18 +1,18 @@
-import { useHorizontalScroll } from "@/app/util/hooks/horizontalScroll";
-import { createRef, ReactNode, useEffect, useState } from "react";
+import { useHorizontalScroll } from "@/app/util/hooks/horizontalScroll"
+import { createRef, ReactNode, useEffect, useState } from "react"
 
 export const ItemsContainer = ({ children }: { children: ReactNode[] }) => {
-  const [isHovered, setIsHovered] = useState(false);
-  const [isScrollVisible, setIsScrollVisible] = useState(false);
-  const containerRef = useHorizontalScroll<HTMLDivElement>();
+  const [isHovered, setIsHovered] = useState(false)
+  const [isScrollVisible, setIsScrollVisible] = useState(false)
+  const containerRef = useHorizontalScroll<HTMLDivElement>()
 
   useEffect(() => {
     if (containerRef.current) {
       setIsScrollVisible(
-        containerRef.current.scrollWidth > containerRef.current.clientWidth
-      );
+        containerRef.current.scrollWidth > containerRef.current.clientWidth,
+      )
     }
-  }, [containerRef]); //eslint-disable-line
+  }, [containerRef]) //eslint-disable-line
 
   // useEffect(() => {
   //   const el = containerRef.current;
@@ -31,7 +31,7 @@ export const ItemsContainer = ({ children }: { children: ReactNode[] }) => {
   //   }
   // }, []); // eslint-disable-line
 
-  if (!children.length) return <></>;
+  if (!children.length) return <></>
   return (
     <>
       <div
@@ -46,5 +46,5 @@ export const ItemsContainer = ({ children }: { children: ReactNode[] }) => {
 
       {!isHovered && isScrollVisible && <div className="h-[7px]"></div>}
     </>
-  );
-};
+  )
+}

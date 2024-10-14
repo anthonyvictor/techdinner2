@@ -2,8 +2,8 @@
 import {
   IBuildingPizza,
   IBuildingPizzaFlavor,
+  IOrderItem,
   IOrderItemPizza,
-  IPizza,
   IPizzaBuilder,
   IPizzaCrust,
   IPizzaDough,
@@ -17,10 +17,7 @@ import {
 } from "@td/types"
 import {
   createContext,
-  Dispatch,
-  MutableRefObject,
   ReactNode,
-  SetStateAction,
   useContext,
   useEffect,
   useLayoutEffect,
@@ -30,6 +27,8 @@ import {
 import { dateTimeReviver, objToString } from "@td/functions/src/format"
 import { api } from "@/app/infra/util/api"
 import { v4 as uuidv4 } from "uuid"
+import { SetState } from "@/app/infra/types/setState"
+import { Ref } from "@/app/infra/types/ref"
 
 interface IPizzaBuilderContext {
   currentPizza: IBuildingPizza
@@ -46,20 +45,25 @@ interface IPizzaBuilderContext {
   setDiscount: (discount?: string) => void
 
   filteredGroups: IPizzaFlavorGroup[]
-  searchFlavorRef: MutableRefObject<HTMLInputElement | undefined>
+  searchFlavorRef: Ref<HTMLInputElement | undefined>
   searchFlavors: string
-  setSearchFlavors: Dispatch<SetStateAction<string>>
+  setSearchFlavors: SetState<string>
+
+  addMultipleItems: (items: IOrderItem[]) => void
+  orderId: string
 
   hoveredFlavor: IPizzaFlavor | undefined
-  hoveredFlavorRef: MutableRefObject<HTMLDivElement | undefined>
-  flavorsListRef: MutableRefObject<HTMLDivElement | undefined>
-  setHoveredFlavor: Dispatch<SetStateAction<IPizzaFlavor | undefined>>
+  hoveredFlavorRef: Ref<HTMLDivElement | undefined>
+  flavorsListRef: Ref<HTMLDivElement | undefined>
+  setHoveredFlavor: SetState<IPizzaFlavor | undefined>
+
+  sizesListRef: Ref<HTMLDivElement | undefined>
 
   isOptionsOpen: boolean
-  setIsOptionsOpen: Dispatch<SetStateAction<boolean>>
+  setIsOptionsOpen: SetState<boolean>
 
-  currentSizeRef: MutableRefObject<HTMLButtonElement | undefined>
-  nextButtonRef: MutableRefObject<HTMLButtonElement | undefined>
+  currentSizeRef: Ref<HTMLButtonElement | undefined>
+  nextButtonRef: Ref<HTMLButtonElement | undefined>
 
   addFlavor: (flavor: IPizzaFlavor | IBuildingPizzaFlavor) => void
   removeFlavor: (code: string) => void
@@ -72,9 +76,13 @@ const PizzaBuilderContext = createContext<IPizzaBuilderContext>(
 export const PizzaBuilderProvider = ({
   children,
   defaultPizza,
+  addMultipleItems,
+  orderId,
 }: {
   children: ReactNode
   defaultPizza?: IOrderItemPizza
+  addMultipleItems: (items: IOrderItem[]) => void
+  orderId: string
 }) => {
   const [isLoading, setIsLoading] = useState(true)
   const [currentPizza, setCurrentPizza] = useState<IBuildingPizza>({
@@ -87,6 +95,7 @@ export const PizzaBuilderProvider = ({
   const [hoveredFlavor, setHoveredFlavor] = useState<IPizzaFlavor | undefined>()
   const searchFlavorRef = useRef<HTMLInputElement>()
   const hoveredFlavorRef = useRef<HTMLDivElement>()
+  const sizesListRef = useRef<HTMLDivElement>()
   const flavorsListRef = useRef<HTMLDivElement>()
   const currentSizeRef = useRef<HTMLButtonElement>()
   const nextButtonRef = useRef<HTMLButtonElement>()
@@ -275,6 +284,11 @@ export const PizzaBuilderProvider = ({
         setExtras,
         setObservations,
         setDiscount,
+
+        addMultipleItems,
+        orderId,
+
+        sizesListRef,
 
         searchFlavors,
         setSearchFlavors,

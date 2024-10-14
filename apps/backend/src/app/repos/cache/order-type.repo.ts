@@ -10,7 +10,7 @@ export class OrderTypeCacheRepo extends BaseRepository<IOrderType> {
   async findAll(query?: OrderTypeGetDTO): Promise<IOrderType[]> {
     throw new Error("Method not implemented.");
   }
-  async findOne(id: string): Promise<IOrderType | undefined> {
+  async findOne(): Promise<IOrderType | undefined> {
     throw new Error("Method not implemented.");
   }
   async createOne(obj: IOrderType): Promise<IOrderType> {
@@ -24,7 +24,7 @@ export class OrderTypeCacheRepo extends BaseRepository<IOrderType> {
 
     const orderIndex = orders.findIndex((x) => x.id === id);
 
-    if (!order || !orderIndex) throw new Error("Pedido não encontrado");
+    if (!order || orderIndex === -1) throw new Error("Pedido não encontrado");
 
     orders[orderIndex].type = obj;
 

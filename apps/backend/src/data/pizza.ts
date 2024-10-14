@@ -79,7 +79,8 @@ export const crusts: {
   cheddar: {
     createdAt: new Date(),
     id: "54sa5d4sa",
-    fullName: "🟠 Cheddar",
+    fullName: "🟠 Borda de Cheddar",
+    displayName: "🟠 Cheddar",
     position: 3,
     isDefault: false,
     avails: avails.todos,
@@ -102,7 +103,8 @@ export const crusts: {
   requeijao: {
     createdAt: new Date(),
     id: "sa6d216a2s2d",
-    fullName: " ⚪ Requeijão",
+    fullName: "⚪ Borda de Requeijão",
+    displayName: "⚪ Requeijão",
     position: 2,
     avails: avails.todos,
     isDefault: false,
@@ -202,6 +204,7 @@ export const doughThicknesses: {
     id: "as2das229s9",
     createdAt: getDate(-10 * 60 * 24 * 30),
     fullName: "👍 Massa mediana",
+    displayName: "👍 Mediana",
     isDefault: true,
     values: [],
     avails: avails.todos,
@@ -210,7 +213,8 @@ export const doughThicknesses: {
   grossa: {
     id: "s6d26a2sd",
     createdAt: getDate(-10 * 60 * 24 * 30),
-    fullName: "⚓ Massa grossa",
+    fullName: "⚓ Massa Grossa",
+    displayName: "⚓ Grossa",
     isDefault: false,
 
     values: [
@@ -235,7 +239,8 @@ export const doughThicknesses: {
   extraGrossa: {
     id: "51fds511f",
     createdAt: getDate(-10 * 60 * 24 * 30),
-    fullName: "🫢 Massa extra grossa",
+    fullName: "🫢 Massa Extra Grossa",
+    displayName: "🫢 XGrossa",
     isDefault: false,
     position: 4,
     values: [
@@ -266,6 +271,7 @@ export const doughTypes: {
     id: "96da2s6d26",
     createdAt: getDate(-10 * 60 * 24 * 30),
     fullName: "⚪ Massa branca",
+    displayName: "⚪ Branca",
     values: [],
     isDefault: true,
     position: 1,
@@ -275,7 +281,8 @@ export const doughTypes: {
   batata: {
     id: "s6d26a2sd",
     createdAt: getDate(-10 * 60 * 24 * 30),
-    fullName: "🥔 Massa de batata",
+    fullName: "🥔 Massa de Batata",
+    displayName: "🥔 Batata",
     isDefault: false,
     position: 2,
     values: [
@@ -300,6 +307,7 @@ export const doughTypes: {
     id: "51fds511f",
     createdAt: getDate(-10 * 60 * 24 * 30),
     fullName: "🧅 Massa com cebola",
+    displayName: "🧅 Cebola",
     isDefault: false,
     position: 3,
 

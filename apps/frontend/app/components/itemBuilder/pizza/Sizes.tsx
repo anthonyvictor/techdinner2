@@ -1,25 +1,25 @@
-import { usePizzaBuilder } from "@/app/context/itemBuilder/Pizza";
-import { Card, Flex, RadioCards, Text } from "@radix-ui/themes";
-import { name } from "@td/functions";
-import { IPizzaSize } from "@td/types";
-import { RefObject, useEffect } from "react";
+import { usePizzaBuilder } from "@/app/context/itemBuilder/Pizza"
+import { Ref } from "@/app/infra/types/ref"
+import { Flex, RadioCards, Text } from "@radix-ui/themes"
+import { name } from "@td/functions"
+import { IPizzaSize } from "@td/types"
 
 export const Sizes = () => {
   const { builder, currentPizza, setSize, hoveredFlavor, currentSizeRef } =
-    usePizzaBuilder();
+    usePizzaBuilder()
 
   return (
     <Flex
       gap="2"
       className="overflow-x-auto"
       overflowX={"auto"}
-      py={{ initial: "0", lg: "2" }}
+      py={{ initial: "0", lg: "1" }}
     >
       <RadioCards.Root
         value={currentPizza.size?.id as string | undefined}
         className="flex overflow-x-auto w-full"
         onValueChange={(e) => {
-          setSize(builder.sizes.find((x) => x.id === e) as IPizzaSize);
+          setSize(builder.sizes.find((x) => x.id === e) as IPizzaSize)
         }}
       >
         <div className="flex-1 lg:hidden" />
@@ -29,7 +29,7 @@ export const Sizes = () => {
             value={size.id as string}
             ref={
               currentPizza.size?.id === size.id
-                ? (currentSizeRef as RefObject<HTMLButtonElement>)
+                ? (currentSizeRef as Ref<HTMLButtonElement>)
                 : undefined
             }
             className={`shrink-0 ${currentPizza.size?.id === size.id ? " bg-orange-3" : ""}`}
@@ -51,5 +51,5 @@ export const Sizes = () => {
         <div className="flex-1 lg:hidden" />
       </RadioCards.Root>
     </Flex>
-  );
-};
+  )
+}

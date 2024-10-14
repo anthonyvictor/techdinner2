@@ -2,9 +2,7 @@ import { IOrder, IOrderItem, IOrderPlatform, IOrderType } from "@td/types"
 import { usePathname, useRouter } from "next/navigation"
 import {
   createContext,
-  Dispatch,
   ReactNode,
-  SetStateAction,
   useContext,
   useEffect,
   useLayoutEffect,
@@ -12,11 +10,12 @@ import {
 } from "react"
 import { dateTimeReviver } from "@td/functions/src/format"
 import { api } from "../infra/util/api"
-import { errorToast } from "../util/functions/toast"
-import { parseRes } from "../infra/util/parseResponse"
+import { useSocket } from "./Socket"
+import { parseDate } from "@td/functions"
+import { SetState } from "../infra/types/setState"
 
 interface IHomeContext {
-  currentOrder: IOrder
+  currentOrder: string | undefined
   orders: IOrder[]
   noType: IOrder[]
   notAccepted: IOrder[]
@@ -28,6 +27,7 @@ interface IHomeContext {
   delivering: IOrder[]
   delivered: IOrder[]
 
+  getCurrentOrder: () => IOrder | undefined
   upsertItem: (item: IOrderItem) => Promise<IOrder | undefined>
   addMultipleItems: (items: IOrderItem[]) => Promise<IOrder | undefined>
   setPlatform: (platform: IOrderPlatform) => Promise<IOrder | undefined>
@@ -37,13 +37,14 @@ interface IHomeContext {
   closeOrder: () => void
   createOrder: () => Promise<IOrder>
   showPanel: boolean
-  setShowPanel: Dispatch<SetStateAction<boolean>>
+  setShowPanel: SetState<boolean>
 }
 const HomeContext = createContext<IHomeContext>({} as IHomeContext)
 
 export const HomeProvider = ({ children }: { children: ReactNode }) => {
-  const [currentOrder, setCurrentOrder] = useState<IOrder>({} as IOrder)
+  const [currentOrder, setCurrentOrder] = useState<string | undefined>()
   const [showPanel, setShowPanel] = useState(false)
+  const { socket } = useSocket()
 
   const [orders, setOrders] = useState<IOrder[]>([])
   const pathname = usePathname()
@@ -80,7 +81,7 @@ export const HomeProvider = ({ children }: { children: ReactNode }) => {
             .filter((x) => x.steps?.length)
             .every((x) => x?.steps?.some((y) => y.type === "done")) &&
           (x.type === "withdraw" ||
-            (!x.address.leaveAt && !x.address.returnAt)),
+            (!x.address?.leaveAt && !x.address?.returnAt)),
       )
     : []
 
@@ -89,7 +90,7 @@ export const HomeProvider = ({ children }: { children: ReactNode }) => {
   const delivery = preparing
     ? preparing.filter(
         (x) =>
-          x.type === "delivery" && !x.address.leaveAt && !x.address.returnAt,
+          x.type === "delivery" && !x.address?.leaveAt && !x.address?.returnAt,
       )
     : []
   const withdraw = preparing
@@ -99,27 +100,85 @@ export const HomeProvider = ({ children }: { children: ReactNode }) => {
   const delivering = notArchived
     ? notArchived.filter(
         (x) =>
-          x.type === "delivery" && x.address.leaveAt && !x.address.returnAt,
+          x.type === "delivery" && x.address?.leaveAt && !x.address?.returnAt,
       )
     : []
   const delivered = notArchived
     ? notArchived.filter(
-        (x) => x.type === "delivery" && x.address.leaveAt && x.address.returnAt,
+        (x) =>
+          x.type === "delivery" && x.address?.leaveAt && x.address?.returnAt,
       )
     : []
 
   useLayoutEffect(() => {
     ;(async () => {
       const res = await api(`orders`)
-      // fetch("/api/orders");
 
       if (res.ok) {
         const _data = JSON.stringify(await res.json())
         const data = JSON.parse(_data, dateTimeReviver)
         setOrders(data)
       }
+
+      socket.on("orderCreated", orderCreated)
+      socket.on("orderUpdated", orderUpdated)
+      socket.on("orderItemUpdated", orderItemUpdated)
+      socket.on("orderItemsUpdated", orderItemsUpdated)
     })()
-  }, [])
+  }, []) //eslint-disable-line
+
+  const orderCreated = (newOrder: IOrder) => {
+    setOrders((prev) => {
+      return [...prev, parseDate(newOrder)]
+    })
+
+    // setCurrentOrder((prev) => ({ ...prev, ...newOrder }))
+  }
+  const orderUpdated = (newOrder: IOrder) => {
+    setOrders((prev) => {
+      const foundOrder = prev.find((x) => x.id === newOrder.id)
+      return [
+        ...prev.filter((x) => x.id !== newOrder.id),
+        { ...foundOrder, ...parseDate(newOrder) },
+      ]
+    })
+
+    // setCurrentOrder((prev) => ({ ...prev, ...newOrder }))
+  }
+  const orderItemUpdated = (newItem: IOrderItem) => {
+    setOrders((prev) => {
+      const newOrders = [...prev]
+      const orderIndex = prev.findIndex((x) => (x.id = newItem.orderId))
+      const itemIndex = newOrders[orderIndex].items.findIndex(
+        (x) => x.id === newItem.id,
+      )
+
+      if (itemIndex > -1) {
+        const oldItem = newOrders[orderIndex].items[itemIndex]
+
+        newOrders[orderIndex].items[itemIndex] = {
+          ...oldItem,
+          ...parseDate(newItem),
+        } as IOrderItem
+      } else {
+        newOrders[orderIndex].items.push(parseDate(newItem))
+      }
+
+      return newOrders
+    })
+  }
+  const orderItemsUpdated = (newItems: IOrderItem[]) => {
+    setOrders((prev) => {
+      const newOrders = [...prev]
+      const orderIndex = prev.findIndex((x) => (x.id = newItems[0].orderId))
+
+      newOrders[orderIndex].items.push(
+        ...newItems.map((x) => parseDate<IOrderItem>(x)),
+      )
+
+      return newOrders
+    })
+  }
 
   useEffect(() => {
     if (pathname.startsWith("/home/order/")) {
@@ -127,15 +186,14 @@ export const HomeProvider = ({ children }: { children: ReactNode }) => {
       if (id) {
         const foundOrder = orders.find((x) => x.id === id)
         if (foundOrder) {
-          // setCurrentOrder(foundOrder)
-          setCurrentOrder(foundOrder)
+          setCurrentOrder(foundOrder.id)
         } else {
           closeOrder()
         }
       } else {
         closeOrder()
       }
-    } else if (pathname.startsWith("/home") && currentOrder?.id) {
+    } else if (pathname.startsWith("/home") && currentOrder) {
       closeOrder()
     }
   }, [pathname]) //eslint-disable-line
@@ -161,14 +219,21 @@ export const HomeProvider = ({ children }: { children: ReactNode }) => {
     }
   }
 
-  const getCurrentOrder = () => (currentOrder?.id ? currentOrder : undefined)
+  const getCurrentOrder = () => {
+    if (currentOrder) {
+      const foundOrder = orders.find((x) => x.id === currentOrder)
+      return foundOrder
+    } else {
+      return undefined
+    }
+  }
 
   const openOrder = (order: IOrder) => {
     router.push(`/home/order/${order.id}`)
   }
   const closeOrder = () => {
     router.push(`/home`)
-    setCurrentOrder({} as IOrder)
+    setCurrentOrder(undefined)
   }
   const updateOrder = (newOrder: IOrder) => {
     const oldOrder = orders.find((order) => order.id === newOrder.id)
@@ -185,10 +250,11 @@ export const HomeProvider = ({ children }: { children: ReactNode }) => {
   }
 
   const addMultipleItems = async (items: IOrderItem[]) => {
-    const order = getCurrentOrder()
+    let order = getCurrentOrder()
 
     if (!order) {
-      await createOrder({ items })
+      order = await createOrder({ items })
+      openOrder(order)
       return
     }
 
@@ -202,14 +268,10 @@ export const HomeProvider = ({ children }: { children: ReactNode }) => {
 
     if (!res.ok)
       throw new Error("Não foi possível adicionar os itens ao pedido!")
-    const _data = JSON.stringify(await res.json())
-    const data = JSON.parse(_data, dateTimeReviver) as unknown as IOrderItem[]
 
-    order.items = [...order.items, ...data]
+    // console.log('-----------', order)
 
-    setOrders((prev) => [...prev.filter((x) => x.id !== order.id), order])
-
-    openOrder(order)
+    // openOrder(order)
 
     return order
   }
@@ -222,25 +284,19 @@ export const HomeProvider = ({ children }: { children: ReactNode }) => {
       return
     }
 
-    const res =
-      item.id && item.orderId
-        ? await api(
-            `order-items/${item.id}`,
-            "PUT",
-            JSON.stringify({ data: { ...item, orderId: order.id } }),
-          )
-        : await api(
-            `order-items`,
-            "POST",
-            JSON.stringify({ data: { ...item, orderId: order.id } }),
-          )
-
-    const data = await parseRes<IOrder>(
-      res,
-      "Não foi possível adicionar / editar o item no pedido!",
-    )
-    updateOrder(data)
-    openOrder(order)
+    // const res =
+    //   item.id && item.orderId
+    //     ? await api(
+    //         `order-items/${item.id}`,
+    //         "PUT",
+    //         JSON.stringify({ data: { ...item, orderId: order.id } }),
+    //       )
+    //     : await api(
+    //         `order-items`,
+    //         "POST",
+    //         JSON.stringify({ data: { ...item, orderId: order.id } }),
+    //       )
+    // openOrder(order)
     return order
   }
 
@@ -251,18 +307,12 @@ export const HomeProvider = ({ children }: { children: ReactNode }) => {
       await createOrder({ platform })
       return
     }
-
     const res = await api(
       `order-platform/${order.id}`,
       "PUT",
       JSON.stringify({ data: platform }),
     )
 
-    const data = await parseRes<IOrder>(
-      res,
-      "Não foi possível atualizar a plataforma do pedido",
-    )
-    updateOrder(data)
     openOrder(order)
     return order
   }
@@ -280,11 +330,6 @@ export const HomeProvider = ({ children }: { children: ReactNode }) => {
       JSON.stringify({ data: type }),
     )
 
-    const data = await parseRes<IOrder>(
-      res,
-      "Não foi possível atualizar o tipo do pedido",
-    )
-    updateOrder(data)
     openOrder(order)
     return order
   }
@@ -293,6 +338,8 @@ export const HomeProvider = ({ children }: { children: ReactNode }) => {
     <HomeContext.Provider
       value={{
         currentOrder,
+        getCurrentOrder,
+
         openOrder,
         closeOrder,
         createOrder,

@@ -3,14 +3,17 @@ import { BaseController } from "@/src/infra/classes/BaseController";
 import { Request, Response } from "express";
 import { OrderItemsGetDTO } from "@/src/infra/types/dto/order-items";
 import { HTTPError } from "@/src/infra/classes/HTTPError";
+import { io } from "@/src";
+import { getIsFrom } from "../../middlewares/from";
 
 export class OrderItemsController extends BaseController<IOrderItem> {
   get = async (req: Request, res: Response) => {
     try {
+      const from = getIsFrom(req);
       let data: IOrderItem[] | IOrderItem | undefined;
       const id = req?.params?.id;
       if (id) {
-        data = await this.service.findOne(id);
+        data = await this.service.findOne({ id, from });
       } else {
         data = await this.service.findAll(
           req.query as unknown as OrderItemsGetDTO
@@ -32,6 +35,8 @@ export class OrderItemsController extends BaseController<IOrderItem> {
       const obj = req.body?.data;
       if (!obj) throw new HTTPError("Bad request");
       data = await this.service.createOne(obj);
+
+      io.emit("orderItemUpdated", data);
 
       res.json(data);
     } catch (err) {
@@ -55,6 +60,8 @@ export class OrderItemsController extends BaseController<IOrderItem> {
 
       data = await this.service.updateOne(id, obj);
 
+      io.emit("orderItemUpdated", data);
+
       res.json(data);
     } catch (err) {
       console.error((err as Error).message, (err as Error).stack);
@@ -72,6 +79,8 @@ export class OrderItemsController extends BaseController<IOrderItem> {
       if (!objs.length) throw new HTTPError("Bad request");
 
       data = await this.service.createMany(objs);
+
+      io.emit("orderItemsUpdated", data);
 
       res.json(data);
     } catch (err) {

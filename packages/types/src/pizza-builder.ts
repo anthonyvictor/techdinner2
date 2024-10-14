@@ -1,4 +1,5 @@
 import { IDiscount } from "./discount";
+import { ItemComponentType } from "./item";
 import {
   IPizza,
   IPizzaCrust,
@@ -24,10 +25,7 @@ export type IPizzaBuilder = {
   discounts: IDiscount[];
 };
 
-export interface IBuildingPizza
-  extends Omit<IPizza, "size" | "id" | "createdAt" | "flavors"> {
-  id?: string;
-  createdAt?: Date;
+export interface IBuildingPizza extends Omit<IPizza, "size" | "flavors"> {
   flavors: IBuildingPizzaFlavor[];
   size?: IPizzaSize;
   observations?: string;
@@ -40,12 +38,6 @@ export interface IBuildingPizzaFlavor extends IPizzaFlavor {
   modifications: IBuildingPizzaFlavorIngredient[];
 }
 export interface IBuildingPizzaFlavorIngredient extends IPizzaFlavorIngredient {
-  is: IBuildingPizzaFlavorIngredientType;
+  is: ItemComponentType;
   finalValue: number;
 }
-
-export type IBuildingPizzaFlavorIngredientType =
-  | "with"
-  | "without"
-  | "less"
-  | "quite";

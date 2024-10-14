@@ -45,7 +45,6 @@ export interface ICombo extends NamedData {
   category: "combo";
   composition: IOfferItemsGroup[];
   fixedValue?: number;
-  description?: string;
   stock?: number;
   sold: number;
   avails: Avail[];

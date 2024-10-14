@@ -1,4 +1,5 @@
-import { useState, useEffect, RefObject, useCallback } from "react"
+import { Ref } from "@/app/infra/types/ref"
+import { useState, useEffect, useCallback } from "react"
 
 function isElementInViewport(el: Element) {
   var rect = el.getBoundingClientRect()
@@ -11,7 +12,7 @@ function isElementInViewport(el: Element) {
   )
 }
 
-export function useInViewport(ref: RefObject<Element>) {
+export function useInViewport(ref: Ref<Element>) {
   const [isVisible, setIsVisible] = useState(true)
 
   const update = useCallback(() => {

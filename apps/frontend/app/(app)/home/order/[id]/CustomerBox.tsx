@@ -1,9 +1,11 @@
+import { MyAvatar } from "@/app/components/MyAvatar"
 import { useHome } from "@/app/context/Home"
 import {
   Avatar,
   Badge,
   Box,
   Flex,
+  IconButton,
   Separator,
   Strong,
   Text,
@@ -11,37 +13,53 @@ import {
 import { getCustomerName } from "@td/functions"
 import { applyDiscount } from "@td/functions/src/calc"
 import { startsWith } from "@td/functions/src/filters"
-import { address, currency, phoneNumber } from "@td/functions/src/format"
+import {
+  address,
+  currency,
+  initials,
+  phoneNumber,
+} from "@td/functions/src/format"
 import { useEffect } from "react"
+import { FaMap, FaMapMarkedAlt } from "react-icons/fa"
 
 export const CustomerBox = () => {
-  const { currentOrder } = useHome()
+  const { currentOrder: _currOrder, getCurrentOrder } = useHome()
+
+  const currentOrder = _currOrder ? getCurrentOrder() : undefined
+
+  if (!currentOrder) return <></>
 
   return (
     <Flex gap="2" direction={"column"}>
       <Flex gap="2">
-        <Avatar
+        <MyAvatar
           size={"5"}
-          src={currentOrder.customer?.imageUrl}
+          // src={currentOrder.customer?.imageUrl}
+          src={currentOrder?.customer?.imageUrl}
           fallback={
-            currentOrder.customer?.initials ?? currentOrder.title ?? "CD"
+            // currentOrder.customer?.initials ?? currentOrder.title ?? "CD"
+            initials(currentOrder?.customer, currentOrder?.title) ?? "CD"
           }
         />
         <Flex direction={"column"}>
           <Text>
             {(() => {
+              // const name = getCustomerName(currentOrder)
+              // return name ?? currentOrder.title ?? "Cliente Desconhecido"
               const name = getCustomerName(currentOrder)
-              return name ?? currentOrder.title ?? "Cliente Desconhecido"
+              return name ?? currentOrder?.title ?? "Cliente Desconhecido"
             })()}
           </Text>
-          {currentOrder.customer?.tags && (
+          {/* {currentOrder.customer?.tags && ( */}
+          {currentOrder?.customer?.tags && (
             <Text size={"1"}>
-              {(currentOrder.customer?.tags ?? [])
+              {/* {(currentOrder.customer?.tags ?? [])
                 .map((x) => x.value)
-                .join(", ")}
+                .join(", ")} */}
+              {(currentOrder?.customer?.tags ?? []).join(", ")}
             </Text>
           )}
-          {currentOrder.customer?.phoneNumbers && (
+          {/* {currentOrder.customer?.phoneNumbers && (
             <ul className="overflow-x-auto">
               <Badge size={"1"}>
                 {(currentOrder.customer?.phoneNumbers ?? [])
@@ -49,23 +67,42 @@ export const CustomerBox = () => {
                   .join(", ")}
               </Badge>
             </ul>
+          )} */}
+          {currentOrder?.customer?.phoneNumbers && (
+            <ul className="overflow-x-auto">
+              <Badge size={"1"}>
+                {(currentOrder?.customer?.phoneNumbers ?? [])
+                  .map((x) => phoneNumber(x.value))
+                  .join(", ")}
+              </Badge>
+            </ul>
           )}
         </Flex>
       </Flex>
-      {currentOrder.type === "delivery" && currentOrder.address ? (
-        <Text size={"1"}>
-          <Strong>
-            {currency(
-              applyDiscount(
-                currentOrder.address.initialFee,
-                currentOrder.address.discount,
-              ),
-            )}
-          </Strong>
-          {" - "}
-          <Text>{address(currentOrder.address)}</Text>
-        </Text>
-      ) : currentOrder.type === "withdraw" ? (
+      {/* {currentOrder.type === "delivery" && currentOrder.address ? ( */}
+      {currentOrder?.type === "delivery" && currentOrder?.address ? (
+        <Flex gap={"1"}>
+          <IconButton variant="surface">
+            <FaMapMarkedAlt />
+          </IconButton>
+          <Text size={"1"}>
+            <Strong>
+              {currency(
+                applyDiscount(
+                  // currentOrder.address.initialFee,
+                  // currentOrder.address.discount,
+                  currentOrder?.address.initialFee,
+                  currentOrder?.address.discount,
+                ),
+              )}
+            </Strong>
+            {" - "}
+            {/* <Text>{address(currentOrder.address)}</Text> */}
+            <Text>{address(currentOrder.address)}</Text>
+          </Text>
+        </Flex>
+      ) : // ) : currentOrder.type === "withdraw" ? (
+      currentOrder.type === "withdraw" ? (
         <></>
       ) : (
         <></>

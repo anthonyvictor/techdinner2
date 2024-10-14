@@ -2,11 +2,14 @@ import { BaseController } from "@/src/infra/classes/BaseController";
 import { Request, Response } from "express";
 import { IPizzaBuilder } from "@td/types";
 import { HTTPError } from "@/src/infra/classes/HTTPError";
+import { getIsFrom } from "../../middlewares/from";
 
 export class PizzaBuilderController extends BaseController<IPizzaBuilder> {
   get = async (req: Request, res: Response) => {
     try {
-      const data = await this.service.findOne("");
+      const from = getIsFrom(req);
+
+      const data = await this.service.findOne({ id: "", from });
       res.json(data);
     } catch (err) {
       console.error(err.message);

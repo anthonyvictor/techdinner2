@@ -1,17 +1,18 @@
-import { useCurrentWindow } from "@/app/context/CurrentWindow";
-import { ascii } from "@/app/infra/data/ascii";
-import { MutableRefObject, useEffect } from "react";
+import { useCurrentWindow } from "@/app/context/CurrentWindow"
+import { ascii } from "@/app/infra/data/ascii"
+import { Ref } from "@/app/infra/types/ref"
+import { useEffect } from "react"
 
 export function useInputAnywhere(
   THIS_WINDOW: string,
-  ref: MutableRefObject<HTMLTextAreaElement | HTMLInputElement | undefined>,
-  searchInputId: string
+  ref: Ref<HTMLTextAreaElement | HTMLInputElement | undefined>,
+  searchInputId: string,
 ) {
-  const { currentWindow } = useCurrentWindow();
+  const { currentWindow } = useCurrentWindow()
 
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
-      if (currentWindow !== THIS_WINDOW) return;
+      if (currentWindow !== THIS_WINDOW) return
       if (
         ref?.current &&
         document.activeElement !== ref?.current &&
@@ -19,20 +20,20 @@ export function useInputAnywhere(
         !(document.activeElement instanceof HTMLTextAreaElement) &&
         ascii.some((x) => e.key === x)
       ) {
-        e.stopPropagation();
-        ref?.current?.focus?.();
+        e.stopPropagation()
+        ref?.current?.focus?.()
       }
-    };
+    }
 
-    window.addEventListener("keydown", onKeyDown);
+    window.addEventListener("keydown", onKeyDown)
 
     return () => {
-      window.removeEventListener("keydown", onKeyDown);
-    };
-  }, [ref, ref?.current]); // eslint-disable-line
+      window.removeEventListener("keydown", onKeyDown)
+    }
+  }, [ref, ref?.current]) // eslint-disable-line
 
   useEffect(() => {
-    const el = document.querySelector(searchInputId);
-    if (el) ref.current = el as HTMLInputElement;
-  }, []); //eslint-disable-line
+    const el = document.querySelector(searchInputId)
+    if (el) ref.current = el as HTMLInputElement
+  }, []) //eslint-disable-line
 }

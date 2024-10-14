@@ -2,44 +2,50 @@ import {
   PizzaBuilderProvider,
   usePizzaBuilder,
 } from "@/app/context/itemBuilder/Pizza"
-import { Button, Flex, Separator, Text } from "@radix-ui/themes"
+import { Button, Flex, Separator } from "@radix-ui/themes"
 import {
   IBuildingPizza,
-  IBuildingPizzaFlavor,
   Identifier,
+  IOrderItem,
   IOrderItemPizza,
-  IPizza,
+  IPizzaCrust,
+  IPizzaDoughBakingLevel,
+  IPizzaDoughThickness,
+  IPizzaDoughType,
 } from "@td/types"
-import { Crust } from "./Crust"
-import { DoughThickness } from "./DoughThickness"
-import { DoughType } from "./DoughType"
 import { Extras } from "./Extras"
 import { Bottom } from "./Bottom"
-import { Observations } from "./Observations"
 import { Sizes } from "./Sizes"
-import { SearchFlavors } from "./SearchFlavors"
-import {
-  Dispatch,
-  RefObject,
-  SetStateAction,
-  useCallback,
-  useEffect,
-} from "react"
+import { useEffect } from "react"
 import { useInputAnywhere } from "@/app/util/hooks/inputAnywhere"
 import { Flavors } from "./Flavors"
-import { useMoveAnywhere } from "@/app/util/hooks/moveAnywhere"
-import { useAddSubtractAnywhere } from "@/app/util/hooks/addSubtractAnywhere"
 import { useFuncAnywhere } from "@/app/util/hooks/funcAnywhere"
 import { useCurrentWindow } from "@/app/context/CurrentWindow"
 import { useCurrentWindowSetter } from "@/app/util/hooks/currentWindowSetter"
-import { Discount } from "./Discount"
 import { useItemBuilder } from "../ItemBuilder"
-import { DoughBakingLevel } from "./DoughBakingLevel"
+import { useSelectItem } from "@/app/util/hooks/selectItem"
+import { useArrowAnywhere } from "@/app/util/hooks/arrowAnywhere"
+import { useAddSubtractAnywhere } from "@/app/util/hooks/addSubtractAnywhere"
+import { ItemDiscount } from "../Discount"
+import { ItemObservations } from "../Observations"
+import { ItemSearch } from "../Search"
+import { SetState } from "@/app/infra/types/setState"
+import { ItemSelect } from "../Select"
 
-export const PizzaBuilder = ({ pizza }: { pizza?: IBuildingPizza }) => {
+export const PizzaBuilder = ({
+  pizza,
+  addMultipleItems,
+  orderId,
+}: {
+  pizza?: IBuildingPizza
+  addMultipleItems: (items: IOrderItem[]) => void
+  orderId: string
+}) => {
   return (
     <PizzaBuilderProvider
       defaultPizza={{ ...pizza, type: "pizza" } as IOrderItemPizza}
+      addMultipleItems={addMultipleItems}
+      orderId={orderId}
     >
       <PizzaBuilderContent />
     </PizzaBuilderProvider>
@@ -50,7 +56,9 @@ export const PizzaBuilderContent = () => {
     setSize,
     builder,
     currentPizza,
+    sizesListRef,
     searchFlavors,
+    setSearchFlavors,
     searchFlavorRef,
     hoveredFlavor,
     filteredGroups,
@@ -62,39 +70,27 @@ export const PizzaBuilderContent = () => {
     isOptionsOpen,
     setIsOptionsOpen,
     nextButtonRef,
+    setObservations,
+    setDiscount,
+    setCrust,
+    setDoughBakingLevel,
+    setDoughThickness,
+    setDoughType,
   } = usePizzaBuilder()
 
   const { currentWindow } = useCurrentWindow()
 
   const THIS_WINDOW = "pizza-builder"
+  const SEARCH_ID = "search-pizza-flavors"
   useCurrentWindowSetter(THIS_WINDOW)
 
-  useInputAnywhere(
-    THIS_WINDOW,
-    searchFlavorRef,
-    "#search-pizza-flavors-builder",
-  )
-
-  useMoveAnywhere(
-    THIS_WINDOW,
-    searchFlavors,
-    searchFlavorRef,
-    filteredGroups.map((x) => x.flavors).flat(),
-    hoveredFlavor,
-    setHoveredFlavor as Dispatch<SetStateAction<Identifier | undefined>>,
-    hoveredFlavorRef,
-    flavorsListRef,
-    addFlavor as (item: Identifier) => void,
-    [filteredGroups, currentPizza, hoveredFlavor, currentWindow],
-  )
+  useInputAnywhere(THIS_WINDOW, searchFlavorRef, "#" + SEARCH_ID)
 
   useAddSubtractAnywhere(
     THIS_WINDOW,
-    searchFlavorRef,
-    builder.sizes,
-    currentPizza.size,
-    setSize as (item: Identifier | undefined) => void,
-    currentSizeRef,
+    () => nextSize(),
+    () => previousSize(),
+    [searchFlavorRef?.current],
     [currentPizza.size, builder.sizes, currentWindow],
   )
 
@@ -109,18 +105,50 @@ export const PizzaBuilderContent = () => {
     [currentWindow],
   )
 
+  const { nextItem: nextFlavor, previousItem: previousFlavor } = useSelectItem(
+    filteredGroups
+      .map((x) => x.flavors)
+      .flat()
+      .filter(Boolean) as Identifier[],
+    hoveredFlavor,
+    setHoveredFlavor as SetState<Identifier | undefined>,
+    hoveredFlavorRef,
+    flavorsListRef,
+    searchFlavors,
+  )
+
+  const { nextItem: nextSize, previousItem: previousSize } = useSelectItem(
+    builder.sizes.filter(Boolean) as Identifier[],
+    currentPizza.size,
+    setSize as SetState<Identifier | undefined>,
+    currentSizeRef,
+    sizesListRef,
+    "",
+  )
+
+  useArrowAnywhere(
+    THIS_WINDOW,
+    () => previousFlavor(),
+    () => nextFlavor(),
+    () => {
+      if (hoveredFlavor) addFlavor(hoveredFlavor)
+    },
+    [searchFlavorRef.current],
+    [filteredGroups, currentPizza, hoveredFlavor, currentWindow],
+  )
+
   const { setAskToClose, setAskToCloseTitle } = useItemBuilder()
 
   useEffect(() => {
     setAskToClose(true)
-    setAskToCloseTitle("Cancelar adição / edição desta pizza?")
+    setAskToCloseTitle("Cancelar adição / edição deste item?")
   }, []) //eslint-disable-line
 
   return (
     <>
       <div
-        className="flex flex-col
-      lg:grid grid-cols-[1fr,2px,200px] min-h-0 flex-1 gap-2 select-none"
+        className="flex flex-col flex-1 gap-2 select-none
+        lg:grid grid-cols-[1fr,2px,200px] min-h-0"
       >
         <Flex
           direction={"column"}
@@ -130,7 +158,12 @@ export const PizzaBuilderContent = () => {
           flexShrink={"1"}
         >
           <Sizes />
-          <SearchFlavors />
+          <ItemSearch
+            id={SEARCH_ID}
+            search={searchFlavors}
+            setSearch={setSearchFlavors}
+            searchRef={searchFlavorRef}
+          />
           <Flavors />
         </Flex>
         <Separator
@@ -152,14 +185,67 @@ export const PizzaBuilderContent = () => {
             flexGrow={"1"}
             flexShrink={"1"}
           >
-            <Crust />
-            <DoughBakingLevel />
-            <DoughThickness />
-            <DoughType />
-            <Text size="1">Extras:</Text>
+            <ItemSelect
+              label="Borda"
+              items={builder.crusts}
+              value={currentPizza.crust?.id}
+              setValue={(value) =>
+                setCrust(
+                  builder.crusts.find((x) => x.id === value) as IPizzaCrust,
+                )
+              }
+            />
+
+            <ItemSelect
+              label="Ponto da massa"
+              items={builder.doughBakingLevels}
+              value={currentPizza.dough?.bakingLevel?.id}
+              setValue={(value) =>
+                setDoughBakingLevel(
+                  builder.doughBakingLevels.find(
+                    (x) => x.id === value,
+                  ) as IPizzaDoughBakingLevel,
+                )
+              }
+            />
+
+            <ItemSelect
+              label="Grossura da massa"
+              items={builder.doughThicknesses}
+              value={currentPizza.dough?.thickness?.id}
+              setValue={(value) =>
+                setDoughThickness(
+                  builder.doughThicknesses.find(
+                    (x) => x.id === value,
+                  ) as IPizzaDoughThickness,
+                )
+              }
+            />
+
+            <ItemSelect
+              label="Tipo da massa"
+              items={builder.doughTypes}
+              value={currentPizza.dough?.type?.id}
+              setValue={(value) =>
+                setDoughType(
+                  builder.doughTypes.find(
+                    (x) => x.id === value,
+                  ) as IPizzaDoughType,
+                )
+              }
+            />
+
             <Extras />
-            <Discount />
-            <Observations />
+            <ItemDiscount
+              discountString={currentPizza.discount}
+              setDiscountString={setDiscount}
+              preDiscounts={builder.discounts}
+            />
+            <ItemObservations
+              observations={currentPizza.observations}
+              setObservations={setObservations}
+              preObservations={["Cortar em + fatias", "Mandar condimentos"]}
+            />
           </Flex>
           <Bottom />
         </Flex>

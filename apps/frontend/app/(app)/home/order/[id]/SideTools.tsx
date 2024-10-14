@@ -1,31 +1,27 @@
-import { useHome } from "@/app/context/Home";
-import { Badge, Button, Card, Flex, IconButton } from "@radix-ui/themes";
-import { IconBase, IconType } from "react-icons";
-import {
-  FaCheckCircle,
-  FaClipboard,
-  FaFolderOpen,
-  FaMotorcycle,
-  FaPeopleArrows,
-} from "react-icons/fa";
-import { IoCheckmarkCircle, IoCloseCircle, IoPrint } from "react-icons/io5";
+import { useHome } from "@/app/context/Home"
+import { Card, Flex, IconButton } from "@radix-ui/themes"
+import { IconBase, IconType } from "react-icons"
+import { FaClipboard, FaFolderOpen, FaMotorcycle } from "react-icons/fa"
+import { IoCheckmarkCircle, IoCloseCircle } from "react-icons/io5"
 
 export const SideTools = () => {
-  const { currentOrder } = useHome();
+  const { currentOrder: currOrderId, getCurrentOrder } = useHome()
 
-  if (!currentOrder) return <></>;
+  const currentOrder = currOrderId ? getCurrentOrder() : undefined
+
+  if (!currentOrder) return <></>
 
   const delivering =
     currentOrder.type === "delivery" &&
     !!currentOrder.address.leaveAt &&
-    !currentOrder.address.returnAt;
+    !currentOrder.address.returnAt
 
   const archived =
-    !!currentOrder?.archivedUntil && currentOrder?.archivedUntil > new Date();
+    !!currentOrder?.archivedUntil && currentOrder?.archivedUntil > new Date()
 
   const buttons: {
-    title: string;
-    icon: IconType;
+    title: string
+    icon: IconType
     color?:
       | "gray"
       | "gold"
@@ -52,10 +48,10 @@ export const SideTools = () => {
       | "grass"
       | "lime"
       | "mint"
-      | "sky";
-    visible: boolean;
-    enabled: boolean;
-    click: () => Promise<void>;
+      | "sky"
+    visible: boolean
+    enabled: boolean
+    click: () => Promise<void>
   }[] = [
     {
       title: "Copiar confirmação do pedido para o clipboard",
@@ -96,7 +92,7 @@ export const SideTools = () => {
       color: "yellow",
       click: async () => {},
     },
-  ];
+  ]
 
   return (
     <Card className="h-full" style={{ padding: "8px" }}>
@@ -118,5 +114,5 @@ export const SideTools = () => {
           ))}
       </Flex>
     </Card>
-  );
-};
+  )
+}

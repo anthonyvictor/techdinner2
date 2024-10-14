@@ -1,4 +1,4 @@
-import { SetState } from "@/app/infra/types/setState";
+import { SetState } from "@/app/infra/types/setState"
 import {
   AlertDialog,
   Button,
@@ -6,35 +6,28 @@ import {
   Flex,
   Text,
   VisuallyHidden,
-} from "@radix-ui/themes";
-import {
-  createContext,
-  Dispatch,
-  ReactNode,
-  SetStateAction,
-  useContext,
-  useState,
-} from "react";
-import { useContrDialog } from "../ControlledDialog";
+} from "@radix-ui/themes"
+import { createContext, ReactNode, useContext, useState } from "react"
+import { useContrDialog } from "../ControlledDialog"
 
 type IITemBuilderContext = {
-  askToClose: boolean;
-  askToCloseTitle?: string;
-  setAskToClose: SetState<boolean>;
-  setAskToCloseTitle: SetState<string>;
-};
+  askToClose: boolean
+  askToCloseTitle?: string
+  setAskToClose: SetState<boolean>
+  setAskToCloseTitle: SetState<string>
+}
 
 const ItemBuilderContext = createContext<IITemBuilderContext>(
-  {} as IITemBuilderContext
-);
+  {} as IITemBuilderContext,
+)
 
 export const ItemBuilder = ({ children }: { children: ReactNode }) => {
-  const [askToClose, setAskToClose] = useState(false);
-  const [showAsk, setShowAsk] = useState(false);
+  const [askToClose, setAskToClose] = useState(false)
+  const [showAsk, setShowAsk] = useState(false)
   const [askToCloseTitle, setAskToCloseTitle] = useState(
-    "Deseja realmente sair?"
-  );
-  const { setOpen } = useContrDialog();
+    "Deseja realmente sair?",
+  )
+  const { setOpen } = useContrDialog()
 
   return (
     <ItemBuilderContext.Provider
@@ -48,16 +41,16 @@ export const ItemBuilder = ({ children }: { children: ReactNode }) => {
       <Dialog.Content
         onInteractOutside={(e) => {
           if (askToClose) {
-            e.preventDefault();
+            e.preventDefault()
             if (e.target === e.currentTarget) {
-              setShowAsk(true);
+              setShowAsk(true)
             }
           }
         }}
         onEscapeKeyDown={(e) => {
           if (askToClose) {
-            e.preventDefault();
-            setShowAsk(true);
+            e.preventDefault()
+            setShowAsk(true)
           }
         }}
         size={"2"}
@@ -76,7 +69,7 @@ export const ItemBuilder = ({ children }: { children: ReactNode }) => {
       <Dialog.Root
         open={showAsk}
         onOpenChange={(e) => {
-          setShowAsk(e);
+          setShowAsk(e)
         }}
       >
         <Dialog.Content>
@@ -87,7 +80,7 @@ export const ItemBuilder = ({ children }: { children: ReactNode }) => {
           <Flex gap={"2"}>
             <Dialog.Close
               onClick={() => {
-                setOpen(false);
+                setOpen(false)
               }}
             >
               <Button
@@ -95,7 +88,7 @@ export const ItemBuilder = ({ children }: { children: ReactNode }) => {
                 variant="outline"
                 size={"3"}
                 onClick={() => {
-                  setOpen(false);
+                  setOpen(false)
                 }}
               >
                 <Text>Sair</Text>
@@ -110,7 +103,7 @@ export const ItemBuilder = ({ children }: { children: ReactNode }) => {
         </Dialog.Content>
       </Dialog.Root>
     </ItemBuilderContext.Provider>
-  );
-};
+  )
+}
 
-export const useItemBuilder = () => useContext(ItemBuilderContext);
+export const useItemBuilder = () => useContext(ItemBuilderContext)

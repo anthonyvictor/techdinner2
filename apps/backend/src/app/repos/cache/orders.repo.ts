@@ -11,7 +11,7 @@ export class OrdersCacheRepo extends BaseRepository<IOrder> {
     const data = orders;
     return data;
   }
-  async findOne(id: string): Promise<IOrder | undefined> {
+  async findOne({ id }: DTO): Promise<IOrder | undefined> {
     const data = orders;
     return data.find((x) => x.id === id);
   }

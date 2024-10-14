@@ -51,15 +51,14 @@ import {
 //   | IPizzaDoughThicknessDiscount
 //   | IPizzaCrustDiscount;
 
-type IDiscountTo = "pizza" | "other" | "fee" | "order";
+type IDiscountTo = "pizza" | "drink" | "other" | "fee" | "order";
 
 export interface IDiscount extends NamedData {
-  description?: string;
   value: string;
   minValue?: number;
   maxValue?: number;
   to: IDiscountTo[];
-  availability: Avail[];
+  avails: Avail[];
   automatic: boolean;
   applied: number;
 }

@@ -3,16 +3,22 @@ import { BaseController } from "@/src/infra/classes/BaseController";
 import { Request, Response } from "express";
 import { CustomersGetDTO } from "@/src/infra/types/dto/customers";
 import { HTTPError } from "@/src/infra/classes/HTTPError";
+import { getIsFrom } from "../../middlewares/from";
 
 export class CustomersController extends BaseController<ICustomer> {
   get = async (req: Request, res: Response) => {
     try {
+      const from = getIsFrom(req);
+
       let data: ICustomer[] | ICustomer | undefined;
       const id = req?.params?.id;
       if (id) {
-        data = await this.service.findOne(id);
+        data = await this.service.findOne({ id, from });
       } else {
-        data = await this.service.findAll(req.query as CustomersGetDTO);
+        data = await this.service.findAll({
+          ...req.query,
+          from,
+        } as CustomersGetDTO);
       }
       res.json(data);
     } catch (err) {

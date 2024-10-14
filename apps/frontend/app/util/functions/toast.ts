@@ -1,38 +1,24 @@
-import { toast } from "react-toastify";
+import { toast } from "react-toastify"
+import { playSound } from "./playSound"
 
 export const errorToast = (message: string) => {
-  toast.error(message, {
+  toast.success(message, {
     onOpen: () => {
-      const audio = document.createElement("audio");
-      audio.volume = 0.1;
-      audio.src = "/audio/error01.wav";
-      audio.autoplay = true;
-      audio.load();
-      audio.addEventListener(
-        "load",
-        () => {
-          audio.play();
-        },
-        true
-      );
+      playSound("/audio/error01.wav")
     },
-  });
-};
+  })
+}
 export const successToast = (message: string) => {
   toast.success(message, {
     onOpen: () => {
-      const audio = document.createElement("audio");
-      audio.volume = 0.1;
-      audio.src = "/audio/success01.wav";
-      audio.autoplay = true;
-      audio.load();
-      audio.addEventListener(
-        "load",
-        () => {
-          audio.play();
-        },
-        true
-      );
+      playSound("/audio/success01.wav")
     },
-  });
-};
+  })
+}
+export const stockAlertToast = (message: string) => {
+  toast.success(message, {
+    onOpen: () => {
+      playSound("/audio/success01.wav")
+    },
+  })
+}

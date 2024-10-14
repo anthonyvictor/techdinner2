@@ -10,7 +10,7 @@ export class OrderPlatformCacheRepo extends BaseRepository<IOrderPlatform> {
   async findAll(query?: OrderPlatformGetDTO): Promise<IOrderPlatform[]> {
     throw new Error("Method not implemented.");
   }
-  async findOne(id: string): Promise<IOrderPlatform | undefined> {
+  async findOne(): Promise<IOrderPlatform | undefined> {
     throw new Error("Method not implemented.");
   }
   async createOne(obj: IOrderPlatform): Promise<IOrderPlatform> {
@@ -24,7 +24,7 @@ export class OrderPlatformCacheRepo extends BaseRepository<IOrderPlatform> {
 
     const orderIndex = orders.findIndex((x) => x.id === id);
 
-    if (!order || !orderIndex) throw new Error("Pedido não encontrado");
+    if (!order || orderIndex === -1) throw new Error("Pedido não encontrado");
 
     orders[orderIndex].platform = obj;
 

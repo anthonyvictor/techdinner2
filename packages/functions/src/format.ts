@@ -2,6 +2,25 @@ import { Address, NamedData } from "@td/types";
 import { startsWith } from "./filters";
 import { isDate } from "date-fns";
 
+export const removeAccents = (txt: string, trim = true) => {
+  const r = String(txt)
+    .replace(/[ÀÁÂÃÄÅ]/g, "A")
+    .replace(/[Ç]/g, "C")
+    .replace(/[ÈÉÊË]/g, "E")
+    .replace(/[ÌÍÎÏ]/g, "I")
+    .replace(/[ÒÓÔÕÖ]/g, "O")
+    .replace(/[ÙÚÛÜ]/g, "U")
+
+    .replace(/[àáâãäå]/g, "a")
+    .replace(/[ç]/g, "c")
+    .replace(/[èéêë]/g, "e")
+    .replace(/[ìíîï]/g, "i")
+    .replace(/[òóôõö]/g, "o")
+    .replace(/[ùúûü]/g, "u");
+
+  return trim ? r.trim() : r;
+};
+
 export function phoneNumber(
   value: string,
   letDDD: boolean = false,
@@ -70,6 +89,12 @@ export const address = (value: Address) => {
 export const currency = (value: number) => {
   return value.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 };
+
+export const litter = (value: number) => {
+  const isMl = value < 1000;
+
+  return `${isMl ? value : value / 1000}${isMl ? "ml" : "L"}`;
+};
 // export const currencyNoPre = (value: number) => {
 //   return value.toLocaleString("pt-BR", {
 //     minimumSignificantDigits: 2,
@@ -95,6 +120,20 @@ export const date = (
 
 export const name = (obj: NamedData) => {
   return obj.shortName ?? obj.displayName ?? obj.fullName;
+};
+export const initials = (obj?: NamedData, fallback?: string) => {
+  if (!obj) {
+    return fallback ?? "";
+  } else if (obj?.initials) {
+    return obj.initials.slice(0, 2);
+  } else if (fallback) {
+    return fallback;
+  } else {
+    const objName = name(obj);
+    const arr = objName.split(" ").map((x) => x.split("")[0]);
+    const str = arr.slice(0, 2).join("");
+    return str;
+  }
 };
 
 export const dateTimeReviver = (key: string, value: any) => {
@@ -124,9 +163,8 @@ export function objToString(obj: any, keysToIgnore: string[]): string {
     "code",
   ];
   Object.entries(obj).forEach(([key, value]) => {
-    if (typeof value === "string" && value.length < 3) {
-      console.log("menor q 3", key);
-    }
+    // if (typeof value === "string" && value.length < 3) {
+    // }
     if (
       _keysToIgnore.includes(key) ||
       value === undefined ||
@@ -145,6 +183,9 @@ export function objToString(obj: any, keysToIgnore: string[]): string {
         value,
         value.toLowerCase().replace(/[^0-9a-z]/g, ""),
         value.toLowerCase().replace(/[^a-z]/g, ""),
+        removeAccents(value),
+        removeAccents(value.toLowerCase().replace(/[^0-9a-z]/g, "")),
+        removeAccents(value.toLowerCase().replace(/[^a-z]/g, "")),
         value.replace(/[^0-9]/g, "")
       );
     } else if (typeof value === "object") {

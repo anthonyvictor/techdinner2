@@ -1,36 +1,32 @@
-import { TextField } from "@radix-ui/themes";
-import {
-  Dispatch,
-  ForwardedRef,
-  forwardRef,
-  RefObject,
-  SetStateAction,
-} from "react";
-import { HiMagnifyingGlass } from "react-icons/hi2";
+import { TextField } from "@radix-ui/themes"
+import { removeAccents } from "@td/functions"
+import { ForwardedRef, forwardRef } from "react"
+import { HiMagnifyingGlass } from "react-icons/hi2"
+import { SetState } from "../infra/types/setState"
 
 type SearchProps = {
-  id: string;
-  value: string;
-  setValue: Dispatch<SetStateAction<string>>;
-  placeholder: string;
-};
+  id: string
+  value: string
+  setValue: SetState<string>
+  placeholder: string
+}
 const SearchComponent = (
   { id, value, setValue, placeholder }: SearchProps,
-  ref: ForwardedRef<HTMLInputElement>
+  ref: ForwardedRef<HTMLInputElement>,
 ) => {
-  const crasis = "`";
+  const crasis = "`"
   return (
     <TextField.Root
       autoComplete="off"
       onKeyDown={(e) => {
         if (
           [
-            ...["ArrowUp", "ArrowDown"],
+            ...["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"],
             ...",+-%@#$¨&()_=!;.?/|".split(""),
             ...(`'"\\\`´´´` + crasis).split(""),
           ].includes(e.key)
         )
-          e.preventDefault();
+          e.preventDefault()
       }}
       ref={ref}
       id={id}
@@ -38,13 +34,13 @@ const SearchComponent = (
       list="none"
       tabIndex={1}
       value={value}
-      onChange={(e) => setValue(e.target.value)}
+      onChange={(e) => setValue(removeAccents(e.target.value, false))}
     >
       <TextField.Slot>
         <HiMagnifyingGlass />
       </TextField.Slot>
     </TextField.Root>
-  );
-};
+  )
+}
 
-export const Search = forwardRef(SearchComponent);
+export const Search = forwardRef(SearchComponent)

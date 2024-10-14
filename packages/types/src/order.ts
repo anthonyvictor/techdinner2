@@ -1,11 +1,13 @@
 import { Address } from "./address";
 import { BaseData, NamedData } from "./base";
 import { ICustomer } from "./customer";
-import { IDrink, Drinkflavor } from "./drink";
+import { IDrink, IDrinkFlavor } from "./drink";
+import { IBuildingDrink } from "./drink-builder";
 import { Driver } from "./driver";
 import { IOther } from "./other";
-import { IPizza } from "./pizza";
-import { IBuildingPizza } from "./pizza-builder";
+import { IBuildingOther } from "./other-builder";
+import { IPizza, IPizzaFlavor, IPizzaSize } from "./pizza";
+import { IBuildingPizza, IBuildingPizzaFlavor } from "./pizza-builder";
 import { User } from "./user";
 
 export type IOrderType = "withdraw" | "delivery";
@@ -67,8 +69,9 @@ export interface IOrderAddress extends Address {
   returnAt?: Date;
 }
 
+export type IOrderPaymentType = "card" | "pix" | "cash";
 interface OrderPaymentBase extends BaseData {
-  type: "card" | "pix" | "cash";
+  type: IOrderPaymentType;
   paidValue: number;
   receivedValue: number;
 }
@@ -97,19 +100,21 @@ interface OrderItemStep extends BaseData {
   type: "queue" | "preparing" | "cooking" | "done";
 }
 
-export interface IOrderItemPizza extends IBuildingPizza {
+export interface IOrderItemPizza
+  extends Omit<IBuildingPizza, "size" | "flavors">,
+    OrderItemBase {
   type: "pizza";
+  size: IPizzaSize;
+  flavors: IBuildingPizzaFlavor[];
 }
-export interface IOrderItemDrink extends Omit<IDrink, "flavors"> {
+export interface IOrderItemDrink extends IBuildingDrink, OrderItemBase {
   type: "drink";
-  flavor?: Drinkflavor;
 }
 
-export interface IOrderItemOther extends IOther {
+export interface IOrderItemOther extends IBuildingOther, OrderItemBase {
   type: "other";
 }
 
-export type IOrderItem = OrderItemBase &
-  (IOrderItemPizza | IOrderItemDrink | IOrderItemOther);
+export type IOrderItem = IOrderItemPizza | IOrderItemDrink | IOrderItemOther;
 
 export interface IOrderCustomer extends ICustomer {}

@@ -1,5 +1,5 @@
-import { useHome } from "@/app/context/Home";
-import { Color } from "@/app/infra/types/color";
+import { useHome } from "@/app/context/Home"
+import { Color } from "@/app/infra/types/color"
 import {
   Box,
   Button,
@@ -9,35 +9,50 @@ import {
   HoverCard,
   Strong,
   Text,
-} from "@radix-ui/themes";
+} from "@radix-ui/themes"
 import {
   getCustomerName,
   getPayment,
   getPaymentStatus,
   getTotal,
-} from "@td/functions";
-import { applyDiscount } from "@td/functions/src/calc";
-import { currency } from "@td/functions/src/format";
-import { useState } from "react";
-import { IconType } from "react-icons";
-import { FaCreditCard, FaMoneyBills, FaPix } from "react-icons/fa6";
+} from "@td/functions"
+import { applyDiscount } from "@td/functions/src/calc"
+import { currency } from "@td/functions/src/format"
+import { useEffect, useState } from "react"
+import { IconType } from "react-icons"
+import { FaCreditCard, FaMoneyBills, FaPix } from "react-icons/fa6"
 
 export const PaymentBox = () => {
-  const { currentOrder } = useHome();
+  const { currentOrder: currOrderId, getCurrentOrder } = useHome()
 
-  const { initialFee, feeDiscount, initialItems, itemsDiscount, total } =
-    getTotal(currentOrder);
+  const currentOrder = currOrderId ? getCurrentOrder() : undefined
+
+  useEffect(() => {
+    if (currentOrder) {
+    }
+  }, [currentOrder])
+
+  if (!currentOrder) return <></>
+
+  const {
+    initialFee,
+    feeDiscount,
+    initialItems,
+    finalItems,
+    itemsDiscount,
+    total,
+  } = getTotal(currentOrder)
 
   const methods: {
-    name: "pix" | "cash" | "card";
-    label: string;
-    icon: IconType;
-    color: Color;
+    name: "pix" | "cash" | "card"
+    label: string
+    icon: IconType
+    color: Color
   }[] = [
     { name: "pix", label: "PIX", icon: FaPix, color: "jade" },
     { name: "cash", label: "Espécie", icon: FaMoneyBills, color: "lime" },
     { name: "card", label: "Cartão", icon: FaCreditCard, color: "purple" },
-  ];
+  ]
 
   return (
     <HoverCard.Root>
@@ -62,8 +77,8 @@ export const PaymentBox = () => {
               <>
                 <Text size={"1"}>Entrega</Text>
                 <Text align={"right"} size={"1"}>
-                  {currency(initialFee)}
-                  {feeDiscount > 0 && (
+                  {currency(initialFee ?? 0)}
+                  {(feeDiscount ?? 0) > 0 && (
                     <Text color="grass">{` - ${currency(feeDiscount)}`}</Text>
                   )}
                 </Text>
@@ -71,7 +86,7 @@ export const PaymentBox = () => {
             )}
 
             {(() => {
-              const { color } = getPaymentStatus(currentOrder);
+              const { color } = getPaymentStatus(currentOrder)
               return (
                 <>
                   <Text size={"2"} color={color}>
@@ -81,7 +96,7 @@ export const PaymentBox = () => {
                     <Strong>{currency(total)}</Strong>
                   </Text>
                 </>
-              );
+              )
             })()}
           </Grid>
           <Flex gap="2" pt="1">
@@ -110,7 +125,7 @@ export const PaymentBox = () => {
                 color,
                 formattedValue,
                 icon: Icon,
-              } = getPayment(payment);
+              } = getPayment(payment)
               return (
                 <Card key={payment.id} asChild>
                   <button>
@@ -135,11 +150,11 @@ export const PaymentBox = () => {
                     </Flex>
                   </button>
                 </Card>
-              );
+              )
             })}
           </Flex>
         </HoverCard.Content>
       )}
     </HoverCard.Root>
-  );
-};
+  )
+}

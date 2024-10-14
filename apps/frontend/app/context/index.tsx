@@ -2,13 +2,16 @@
 
 import { ReactNode } from "react"
 import { CurrentWindowProvider } from "./CurrentWindow"
+import { SocketProvider } from "./Socket"
 
 export const Providers = ({ children }: { children: ReactNode }) => {
   return (
     <>
-      <CurrentWindowProvider>
-        <>{children}</>
-      </CurrentWindowProvider>
+      <SocketProvider>
+        <CurrentWindowProvider>
+          <>{children}</>
+        </CurrentWindowProvider>
+      </SocketProvider>
     </>
   )
 }

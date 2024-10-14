@@ -2,6 +2,7 @@ import { IOrderPlatform } from "@td/types";
 import { BaseController } from "@/src/infra/classes/BaseController";
 import { Request, Response } from "express";
 import { HTTPError } from "@/src/infra/classes/HTTPError";
+import { io } from "@/src";
 
 export class OrderPlatformController extends BaseController<IOrderPlatform> {
   get = async (req: Request, res: Response) => {
@@ -38,6 +39,8 @@ export class OrderPlatformController extends BaseController<IOrderPlatform> {
       if (!obj) throw new HTTPError("Bad request");
 
       data = await this.service.updateOne(id, obj);
+
+      io.emit("orderUpdated", { platform: data, id });
 
       res.json(data);
     } catch (err) {

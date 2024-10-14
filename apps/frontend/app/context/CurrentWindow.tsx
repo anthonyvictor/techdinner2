@@ -1,32 +1,24 @@
-"use client";
-import {
-  createContext,
-  Dispatch,
-  ReactNode,
-  RefObject,
-  SetStateAction,
-  useContext,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+"use client"
+import { createContext, ReactNode, useContext, useRef, useState } from "react"
+import { SetState } from "../infra/types/setState"
+import { Ref } from "../infra/types/ref"
 
 interface ICurrentWindowContext {
-  currentWindowRef: RefObject<HTMLElement | undefined>;
-  currentWindow: string;
-  setCurrentWindow: Dispatch<SetStateAction<string>>;
+  currentWindowRef: Ref<HTMLElement | undefined>
+  currentWindow: string
+  setCurrentWindow: SetState<string>
 }
 const CurrentWindowContext = createContext<ICurrentWindowContext>(
-  {} as ICurrentWindowContext
-);
+  {} as ICurrentWindowContext,
+)
 
 export const CurrentWindowProvider = ({
   children,
 }: {
-  children: ReactNode;
+  children: ReactNode
 }) => {
-  const [currentWindow, setCurrentWindow] = useState("");
-  const currentWindowRef = useRef<HTMLElement>();
+  const [currentWindow, setCurrentWindow] = useState("")
+  const currentWindowRef = useRef<HTMLElement>()
 
   return (
     <CurrentWindowContext.Provider
@@ -38,9 +30,9 @@ export const CurrentWindowProvider = ({
     >
       {children}
     </CurrentWindowContext.Provider>
-  );
-};
+  )
+}
 
 export const useCurrentWindow = () => {
-  return useContext(CurrentWindowContext);
-};
+  return useContext(CurrentWindowContext)
+}

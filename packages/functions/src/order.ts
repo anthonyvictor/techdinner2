@@ -1,4 +1,4 @@
-import { IOrder, IOrderPayment } from "@td/types";
+import { IOrder, IOrderItem, IOrderPayment } from "@td/types";
 import { currency, name } from "./format";
 import { applyDiscount, getDiscountValue } from "./calc";
 import {
@@ -9,6 +9,9 @@ import {
   FaMoneyBills,
   FaPix,
 } from "react-icons/fa6";
+import { getPizzaValue } from "./pizza";
+import { getDrinkValue } from "./drink";
+import { getOtherValue } from "./other";
 
 export const getTotal = (order: IOrder) => {
   let initialItems = 0;
@@ -16,10 +19,12 @@ export const getTotal = (order: IOrder) => {
   let itemsDiscount = 0;
 
   finalItems = order.items.reduce((total, item) => {
-    initialItems += item.initialValue;
-    itemsDiscount += getDiscountValue(item.initialValue, item.discount);
+    const itemValue = getItemValue(item);
+    initialItems += itemValue;
 
-    return total + applyDiscount(item.initialValue, item.discount);
+    itemsDiscount += getDiscountValue(itemValue, item.discount);
+
+    return total + applyDiscount(itemValue, item.discount);
   }, 0);
 
   let initialFee = 0;
@@ -27,7 +32,7 @@ export const getTotal = (order: IOrder) => {
   let feeDiscount = 0;
 
   if (order.type === "delivery") {
-    initialFee = order?.address?.initialFee;
+    initialFee = order?.address?.initialFee ?? 0;
     feeDiscount = getDiscountValue(initialFee, order?.address?.discount);
     finalFee = applyDiscount(initialFee, order?.address?.discount);
   }
@@ -186,4 +191,14 @@ export const getCustomerName = (order: IOrder, short?: boolean) => {
       order.title) ??
     "Sem Cliente ❓"
   );
+};
+
+export const getItemValue = (item: IOrderItem) => {
+  return item.type === "pizza"
+    ? getPizzaValue(item)
+    : item.type === "drink"
+      ? getDrinkValue(item)
+      : item.type === "other"
+        ? getOtherValue(item)
+        : 1000000;
 };

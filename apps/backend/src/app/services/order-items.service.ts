@@ -9,7 +9,7 @@ export class OrderItemsService extends BaseService<IOrderItem> {
     const data = _data;
     return data;
   }
-  async findOne(id: string): Promise<IOrderItem | undefined> {
+  async findOne(): Promise<IOrderItem | undefined> {
     throw new Error("Method not implemented.");
   }
   async createOne(obj: IOrderItem): Promise<IOrderItem> {

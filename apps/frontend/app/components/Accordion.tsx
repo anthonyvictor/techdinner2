@@ -7,18 +7,18 @@ import {
   IconButton,
   Separator,
   TextField,
-} from "@radix-ui/themes";
-import { ReactNode, useState } from "react";
-import { IconBase } from "react-icons";
-import { BsArrowDown, BsArrowLeft } from "react-icons/bs";
-import { CgArrowDown } from "react-icons/cg";
-import { FaArrowDown, FaArrowLeft, FaCog, FaCogs } from "react-icons/fa";
-import { FaBell, FaMagnifyingGlass } from "react-icons/fa6";
+} from "@radix-ui/themes"
+import { ReactNode, useState } from "react"
+import { IconBase } from "react-icons"
+import { BsArrowDown, BsArrowLeft } from "react-icons/bs"
+import { CgArrowDown } from "react-icons/cg"
+import { FaArrowDown, FaArrowLeft, FaCog, FaCogs } from "react-icons/fa"
+import { FaBell, FaMagnifyingGlass } from "react-icons/fa6"
 import {
   MdArrowBack,
   MdOutlineKeyboardArrowDown,
   MdOutlineKeyboardArrowLeft,
-} from "react-icons/md";
+} from "react-icons/md"
 export default function Accordion({
   title,
   color,
@@ -26,10 +26,10 @@ export default function Accordion({
   hidden = false,
   defaultIsOpen = true,
 }: {
-  children: ReactNode;
-  title: string;
-  hidden?: boolean;
-  defaultIsOpen?: boolean;
+  children: ReactNode
+  title: string
+  hidden?: boolean
+  defaultIsOpen?: boolean
   color?:
     | "gray"
     | "gold"
@@ -56,9 +56,9 @@ export default function Accordion({
     | "grass"
     | "lime"
     | "mint"
-    | "sky";
+    | "sky"
 }) {
-  const [isOpen, setIsOpen] = useState(defaultIsOpen);
+  const [isOpen, setIsOpen] = useState(defaultIsOpen)
 
   return hidden ? (
     <></>
@@ -86,5 +86,5 @@ export default function Accordion({
         </div>
       )}
     </>
-  );
+  )
 }

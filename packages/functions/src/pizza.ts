@@ -2,6 +2,7 @@ import {
   IBuildingPizza,
   IBuildingPizzaFlavor,
   IBuildingPizzaFlavorIngredient,
+  IOrderItemPizza,
   IPizzaCrust,
   IPizzaDoughThickness,
   IPizzaDoughType,
@@ -12,6 +13,7 @@ import {
   IPizzaSizeValue,
 } from "@td/types";
 import { name } from "./format";
+import { getComponentTypeLabel } from "./item";
 
 export const getValueBySize = (
   size?: IPizzaSize,
@@ -59,7 +61,7 @@ export const getExtrasValueBySize = (
     : 0;
 };
 
-export const getPizzaValue = (pizza: IBuildingPizza) => {
+export const getPizzaValue = (pizza: IBuildingPizza | IOrderItemPizza) => {
   const flavorsValue = getFlavorsValueBySize(pizza.flavors, pizza.size);
 
   const crustValue = getCrustValueBySize(pizza.size, pizza.crust);
@@ -76,20 +78,11 @@ export const getPizzaValue = (pizza: IBuildingPizza) => {
   return Number(finalValue.toFixed(1));
 };
 
-export const getIngredientModifType = (x: IBuildingPizzaFlavorIngredient) =>
-  x.is === "with"
-    ? "c/"
-    : x.is === "without"
-      ? "s/"
-      : x.is === "less"
-        ? "pouc./"
-        : "bast./";
-
 export const getPizzaFlavorDescription = (flavor: IBuildingPizzaFlavor) => {
   const flavorName = name(flavor);
 
   const flavorIngredients = flavor.modifications
-    ?.map((x) => `${getIngredientModifType(x)} ${name(x)}`)
+    ?.map((x) => `${getComponentTypeLabel(x)} ${name(x)}`)
     .filter(Boolean);
 
   return { name: flavorName, ingredients: flavorIngredients };

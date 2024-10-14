@@ -6,8 +6,8 @@ export class ItemsPanelService extends BaseService<IItemsPanel> {
   async findAll(query?: DTO): Promise<IItemsPanel[]> {
     throw new Error("Method not implemented.");
   }
-  async findOne(id: string): Promise<IItemsPanel | undefined> {
-    const _data = await this?.repo?.findOne?.(id);
+  async findOne({ id, from }: DTO): Promise<IItemsPanel | undefined> {
+    const _data = await this?.repo?.findOne?.({ id, from });
     const data = _data;
     return data;
   }

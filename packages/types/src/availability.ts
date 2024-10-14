@@ -1,5 +1,6 @@
 import { BaseData, NamedData } from "./base";
-import { DaysOfWeek } from "./days";
+import { DayOfWeek } from "./days";
+import { DatePeriod, DaysPeriod, HourPeriod } from "./period";
 
 // export interface Visibility extends BaseData {
 //   user: "hidden" | "disabled" | "enabled";
@@ -12,8 +13,8 @@ import { DaysOfWeek } from "./days";
 // }
 
 export interface Avail extends BaseData {
-  to: "user" | "customer";
-  at: (DaysOfWeek | Date)[] | "*" | "now";
+  to: "user" | "customer" | "*";
+  at: (DayOfWeek | Date | DatePeriod | HourPeriod | DaysPeriod)[] | "*" | "now";
   is: "hidden" | "disabled" | "enabled";
   until?: Date;
 }

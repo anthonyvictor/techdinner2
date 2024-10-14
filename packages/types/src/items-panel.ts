@@ -1,12 +1,11 @@
-import { IOther } from "./other";
-import { IDrink } from "./drink";
-import { IPizza } from "./pizza";
-import { ICombo } from "./combo";
 import { IBuildingPizza } from "./pizza-builder";
+import { IBuildingDrink } from "./drink-builder";
+import { IBuildingOther } from "./other-builder";
+import { IBuildingPromo } from "./promo-builder";
 
 export type IItemsPanel = {
   pizzas: IBuildingPizza[];
-  drinks: IDrink[];
-  others: IOther[];
-  combos: ICombo[];
+  drinks: IBuildingDrink[];
+  others: IBuildingOther[];
+  promos: IBuildingPromo[];
 };

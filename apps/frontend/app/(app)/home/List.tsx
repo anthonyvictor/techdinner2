@@ -22,11 +22,12 @@ export const OrderList = () => {
     openOrder,
   } = useHome()
 
+  // currentOrder?.id ? "max-sm:hidden" : "max-sm:flex-2 max-sm:w-full"
   return (
     <>
       <div
         className={`flex flex-col min-w-52 min-h-0 h-full max-h-full gap-2 ${
-          currentOrder?.id ? "max-sm:hidden" : "max-sm:flex-2 max-sm:w-full"
+          currentOrder ? "max-sm:hidden" : "max-sm:flex-2 max-sm:w-full"
         }`}
       >
         <Flex gap="2" className="flex w-full">
@@ -39,7 +40,6 @@ export const OrderList = () => {
             color="orange"
             onClick={async () => {
               const order = await createOrder()
-              console.log(order)
               await openOrder(order)
             }}
           >

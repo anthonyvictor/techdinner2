@@ -7,7 +7,7 @@ export class OrderTypeService extends BaseService<IOrderType> {
   async findAll(query?: DTO): Promise<IOrderType[]> {
     throw new Error("Method not implemented.");
   }
-  async findOne(id: string): Promise<IOrderType | undefined> {
+  async findOne(): Promise<IOrderType | undefined> {
     throw new Error("Method not implemented.");
   }
   async createOne(obj: IOrderType): Promise<IOrderType> {

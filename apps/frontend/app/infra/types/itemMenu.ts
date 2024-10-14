@@ -1,11 +1,12 @@
-import { IconType } from "react-icons";
-import { Color } from "./color";
-import React, { ReactNode } from "react";
+import { IconType } from "react-icons"
+import { Color } from "./color"
+import React, { ReactNode } from "react"
 
 export interface IItemMenu {
-  name: string;
-  label: string;
-  icon: IconType;
-  component: React.ElementType;
-  color: Color;
+  name: string
+  label: string
+  shortLabel: string
+  icon: IconType
+  component: React.ElementType
+  color: Color
 }

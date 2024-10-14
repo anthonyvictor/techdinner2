@@ -2,10 +2,12 @@ import { BaseController } from "@/src/infra/classes/BaseController";
 import { Request, Response } from "express";
 import { IItemsPanel } from "@td/types";
 import { HTTPError } from "@/src/infra/classes/HTTPError";
+import { getIsFrom } from "../../middlewares/from";
 
 export class ItemsPanelController extends BaseController<IItemsPanel> {
   get = async (req: Request, res: Response) => {
-    const data = await this.service.findOne("");
+    const from = getIsFrom(req);
+    const data = await this.service.findOne({ from });
     res.json(data);
   };
   post = async (req: Request, res: Response) => {

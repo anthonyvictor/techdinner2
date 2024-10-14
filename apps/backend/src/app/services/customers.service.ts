@@ -8,7 +8,7 @@ export class CustomersService extends BaseService<ICustomer> {
     const data = _data;
     return data;
   }
-  async findOne(id: string): Promise<ICustomer | undefined> {
+  async findOne(): Promise<ICustomer | undefined> {
     throw new Error("Method not implemented.");
   }
   async createOne(obj: ICustomer): Promise<ICustomer> {
