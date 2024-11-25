@@ -69,6 +69,8 @@ export const customers: {
         createdAt: new Date(),
         number: "52",
         neighborhood: "Ondina",
+        fullName: "Trabalho",
+        isActive: true,
         place: "Hospital Jorge Valente",
         reference: "Ao lado da farmacia",
         street: "Avenida Anitta Garibaldi",
@@ -137,7 +139,9 @@ export const customers: {
         createdAt: new Date(),
         number: "01",
         neighborhood: "Ondina",
+        fullName: "Casa",
         place: "Pe de Goiaba",
+        isActive: true,
         reference:
           "Descendo o pe de goiaba em frente a casa de Adriano onde tem uma casa com um monte de plantas na frente na sacada",
         street: "Travessa Assembléia de Deus",

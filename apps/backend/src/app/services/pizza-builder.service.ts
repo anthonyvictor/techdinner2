@@ -26,11 +26,9 @@ export class PizzaBuilderService extends BaseService<IPizzaBuilder> {
 
     if (!_data) return undefined;
 
-    console.log(dto.from);
     const sizes = _data.sizes
       .filter((x) => {
         const is = isAvailable(x.avails, dto.from);
-        console.log(x.fullName, is, x.avails);
         return is;
       })
       .sort((a, b) =>

@@ -1,16 +1,28 @@
-import { IPromo, IPromoRule } from "@td/types/src/promo";
+import { IPromo, IPromoItemPizza, IPromoRule } from "@td/types/src/promo";
 import { avails } from "./visibility";
-import { crusts, groups, sizes } from "./pizza";
+import { crusts, flavors, groups, sizes } from "./pizza";
 import { drinks } from "./drinks";
 import { IDrinkFlavor } from "@td/types";
+import { others } from "./others";
 
-const getFlavors = (groupsName: string[]) => {
+const getFlavors = (groupsName: string[], values?: "29") => {
   const _groups = Object.values(groups).filter((y) =>
     groupsName
       .map((z) => z.toLowerCase())
       .some((x) => y.fullName.toLowerCase().includes(x))
   );
-  return _groups.map((x) => x.flavors).flat();
+  const _flavors = Object.values(flavors).filter((x) =>
+    _groups.some((y) => y.id === x.group.id)
+  );
+  return _flavors.map((x) => {
+    let _x = { ...x };
+    if (values === "29") {
+      _x.values = _x.values.map((y) => ({ ...y, value: 29 }));
+    }
+
+    return _x;
+  });
+  // return _groups.map((x) => x.flavors).flat();
 };
 
 const freeSizeValue = [
@@ -26,6 +38,15 @@ const onlyPixCash: IPromoRule = {
   createdAt: new Date(),
   anotherPaymentTypeFee: "5%",
   value: ["pix", "cash"],
+};
+
+const pizza1: IPromoItemPizza = {
+  position: 1,
+  isMandatory: true,
+  id: "primeiraPizza",
+  fullName: "Primeira pizza",
+  createdAt: new Date(),
+  type: "pizza",
 };
 
 export const promos: {
@@ -64,12 +85,17 @@ export const promos: {
         fullName: "O pedido deve ter pelo menos 1 pizza grande ou família",
       },
     ],
-    itemsGroups: [
+    builders: [
       {
+        position: 1,
+        isMandatory: true,
         id: "as9a2cas299",
         createdAt: new Date(),
-        selectionMethod: "or",
-        items: [
+        type: "group",
+        fullName: "Selecione o acompanhamento!",
+        min: 1,
+        max: 1,
+        options: [
           {
             id: "bebida1",
             createdAt: new Date(),
@@ -88,6 +114,14 @@ export const promos: {
             type: "drink",
             drinkId: drinks.suco4.id,
             flavors: [drinks.suco4?.flavors?.[0] as IDrinkFlavor],
+          },
+          {
+            id: "bauru1",
+            createdAt: new Date(),
+            type: "other",
+            otherId: others.bauru.id,
+            sizes: [others.bauru.sizes[0]],
+            variations: [others.bauru.variations[0]],
           },
         ],
       },
@@ -151,7 +185,8 @@ export const promos: {
     subDescription:
       "Valor mínimo de taxa de entrega para aplicar desconto: R$ 3,00",
     isAutomatic: true,
-    imageUrl: "https://www.designi.com.br/images/preview/10689314.jpg",
+    imageUrl:
+      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQF0GekDMu5ka1qSncd1vXwJpbmY-fFYEK8Qg&s",
     rules: [
       {
         type: "customerForEverySpentValue",
@@ -197,27 +232,26 @@ export const promos: {
     isAutomatic: false,
     imageUrl: "https://i.ibb.co/WcTCy8k/Frame-1.png",
     rules: [onlyPixCash],
-    itemsGroups: [
+    builders: [
       {
-        id: "2d92asd2sa9",
+        position: 1,
+        isMandatory: true,
+        id: "pizza1",
         createdAt: new Date(),
-        selectionMethod: "every",
-        items: [
-          {
-            id: "pizza1",
-            createdAt: new Date(),
-            type: "pizza",
-            sizes: [{ ...sizes.grande, maxflavors: 2 }],
-            flavors: getFlavors(["trad", "carne"]),
-          },
-          {
-            id: "pizza2",
-            createdAt: new Date(),
-            type: "pizza",
-            sizes: [{ ...sizes.grande, maxflavors: 2 }],
-            flavors: getFlavors(["trad", "carne"]),
-          },
-        ],
+        type: "pizza",
+        sizes: [{ ...sizes.grande, maxflavors: 2 }],
+        flavors: getFlavors(["trad", "carne"], "29"),
+        fullName: "Primeira pizza",
+      },
+      {
+        position: 2,
+        isMandatory: true,
+        id: "pizza2",
+        createdAt: new Date(),
+        type: "pizza",
+        sizes: [{ ...sizes.grande, maxflavors: 2 }],
+        flavors: getFlavors(["trad", "carne"], "29"),
+        fullName: "Primeira pizza",
       },
     ],
     actions: [
@@ -243,26 +277,33 @@ export const promos: {
     imageUrl:
       "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSOUJAv3xFuRL71jLwtA9FLKVVBZ2o0T9WzKA&s",
     rules: [onlyPixCash],
-    itemsGroups: [
+    builders: [
       {
-        id: "2d92asd2sa9",
+        position: 1,
+        isMandatory: true,
+        id: "pizza",
         createdAt: new Date(),
-        selectionMethod: "every",
-        items: [
-          {
-            id: "pizza",
-            createdAt: new Date(),
-            type: "pizza",
-            sizes: [sizes.media, sizes.grande, sizes.familia],
-            crusts: [crusts.requeijao, crusts.cheddar],
-          },
+        fullName: "Pizza",
+        description: "Selecione a pizza do combo!",
+        type: "pizza",
+        sizes: [sizes.media, sizes.grande, sizes.familia],
+        crusts: [
+          { ...crusts.requeijao, values: freeSizeValue },
+          { ...crusts.cheddar, values: freeSizeValue },
         ],
       },
+
       {
+        position: 2,
+        isMandatory: true,
         id: "as9a2cas299",
         createdAt: new Date(),
-        selectionMethod: "or",
-        items: [
+        type: "group",
+        fullName: "Bebida",
+        description: "Selecione a bebida do combo!",
+        min: 1,
+        max: 1,
+        options: [
           {
             id: "bebida1",
             createdAt: new Date(),
@@ -329,21 +370,17 @@ export const promos: {
     imageUrl:
       "https://fdr.com.br/wp-content/uploads/2021/07/E6sD6BvWEAU8i05.jpg",
     rules: [onlyPixCash],
-    itemsGroups: [
+    builders: [
+      pizza1,
       {
-        id: "2d92asd2sa9",
+        position: 2,
+        isMandatory: true,
+        id: "segundaPizza",
         createdAt: new Date(),
-        selectionMethod: "every",
-        items: [
-          { id: "primeiraPizza", createdAt: new Date(), type: "pizza" },
-          {
-            id: "segundaPizza",
-            createdAt: new Date(),
-            type: "pizza",
-            flavors: getFlavors(["trad", "carne"]),
-            sizes: { sameAs: ["primeiraPizza"] },
-          },
-        ],
+        fullName: "Segunda pizza",
+        type: "pizza",
+        flavors: getFlavors(["trad", "carne"]),
+        sameSizeAs: pizza1.id,
       },
     ],
     actions: [
