@@ -1,9 +1,7 @@
 import { MyAvatar } from "@/app/components/MyAvatar"
-import { useHome } from "@/app/context/Home"
+import { useOrders } from "@/app/context/Orders"
 import {
-  Avatar,
   Badge,
-  Box,
   Flex,
   IconButton,
   Separator,
@@ -12,18 +10,16 @@ import {
 } from "@radix-ui/themes"
 import { getCustomerName } from "@td/functions"
 import { applyDiscount } from "@td/functions/src/calc"
-import { startsWith } from "@td/functions/src/filters"
 import {
   address,
   currency,
   initials,
   phoneNumber,
 } from "@td/functions/src/format"
-import { useEffect } from "react"
-import { FaMap, FaMapMarkedAlt } from "react-icons/fa"
+import { FaMapMarkedAlt } from "react-icons/fa"
 
 export const CustomerBox = () => {
-  const { currentOrder: _currOrder, getCurrentOrder } = useHome()
+  const { currentOrder: _currOrder, getCurrentOrder } = useOrders()
 
   const currentOrder = _currOrder ? getCurrentOrder() : undefined
 

@@ -17,7 +17,7 @@ import { Others } from "./Others"
 import { useFuncAnywhere } from "@/app/util/hooks/funcAnywhere"
 import { useCurrentWindow } from "@/app/context/CurrentWindow"
 import { useCurrentWindowSetter } from "@/app/util/hooks/currentWindowSetter"
-import { useItemBuilder } from "../ItemBuilder"
+import { useItemBuilderPage } from "../ItemBuilder"
 import { useAddSubtractAnywhere } from "@/app/util/hooks/addSubtractAnywhere"
 import { useSelectItem } from "@/app/util/hooks/selectItem"
 import { useArrowAnywhere } from "@/app/util/hooks/arrowAnywhere"
@@ -29,17 +29,14 @@ import { SetState } from "@/app/infra/types/setState"
 
 export const OtherBuilder = ({
   other,
-  addMultipleItems,
   orderId,
 }: {
   other?: IBuildingOther | IOrderItemOther
-  addMultipleItems: (items: IOrderItem[]) => void
   orderId: string
 }) => {
   return (
     <OtherBuilderProvider
       defaultOther={{ ...other, type: "other" } as IOrderItemOther}
-      addMultipleItems={addMultipleItems}
       orderId={orderId}
     >
       <OtherBuilderContent />
@@ -67,6 +64,7 @@ export const OtherBuilderContent = () => {
     isOptionsOpen,
     setIsOptionsOpen,
     nextButtonRef,
+    promoItems,
   } = useOtherBuilder()
 
   const { currentWindow } = useCurrentWindow()
@@ -125,11 +123,13 @@ export const OtherBuilderContent = () => {
     [currentWindow],
   )
 
-  const { setAskToClose, setAskToCloseTitle } = useItemBuilder()
+  const { setAskToClose, setAskToCloseTitle } = useItemBuilderPage()
 
   useEffect(() => {
-    setAskToClose(true)
-    setAskToCloseTitle("Cancelar adição / edição deste item?")
+    if (!promoItems?.length) {
+      setAskToClose(true)
+      setAskToCloseTitle("Cancelar adição / edição deste item?")
+    }
   }, []) //eslint-disable-line
 
   return (

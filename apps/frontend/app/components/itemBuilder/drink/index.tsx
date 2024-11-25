@@ -14,7 +14,7 @@ import { Drinks } from "./Drinks"
 import { useFuncAnywhere } from "@/app/util/hooks/funcAnywhere"
 import { useCurrentWindow } from "@/app/context/CurrentWindow"
 import { useCurrentWindowSetter } from "@/app/util/hooks/currentWindowSetter"
-import { useItemBuilder } from "../ItemBuilder"
+import { useItemBuilderPage } from "../ItemBuilder"
 import { DrinkBuilderProvider } from "@/app/context/itemBuilder/Drink"
 import { useAddSubtractAnywhere } from "@/app/util/hooks/addSubtractAnywhere"
 import { useSelectItem } from "@/app/util/hooks/selectItem"
@@ -24,20 +24,18 @@ import { ItemDiscount } from "../Discount"
 import { ItemObservations } from "../Observations"
 import { ItemSearch } from "../Search"
 import { SetState } from "@/app/infra/types/setState"
+import { IPromoItemDrink } from "@td/types/src/promo"
 
 export const DrinkBuilder = ({
   drink,
-  addMultipleItems,
   orderId,
 }: {
   drink?: IBuildingDrink | IOrderItemDrink
-  addMultipleItems: (items: IOrderItem[]) => void
   orderId: string
 }) => {
   return (
     <DrinkBuilderProvider
       defaultDrink={{ ...drink, type: "drink" } as IOrderItemDrink}
-      addMultipleItems={addMultipleItems}
       orderId={orderId}
     >
       <DrinkBuilderContent />
@@ -65,6 +63,7 @@ export const DrinkBuilderContent = () => {
     isOptionsOpen,
     setIsOptionsOpen,
     nextButtonRef,
+    promoItems,
   } = useDrinkBuilder()
 
   const { currentWindow } = useCurrentWindow()
@@ -123,11 +122,13 @@ export const DrinkBuilderContent = () => {
     [currentWindow],
   )
 
-  const { setAskToClose, setAskToCloseTitle } = useItemBuilder()
+  const { setAskToClose, setAskToCloseTitle } = useItemBuilderPage()
 
   useEffect(() => {
-    setAskToClose(true)
-    setAskToCloseTitle("Cancelar adição / edição deste item?")
+    if (!promoItems?.length) {
+      setAskToClose(true)
+      setAskToCloseTitle("Cancelar adição / edição deste item?")
+    }
   }, []) //eslint-disable-line
 
   return (

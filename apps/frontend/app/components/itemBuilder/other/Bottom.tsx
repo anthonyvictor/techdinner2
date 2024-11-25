@@ -8,16 +8,21 @@ import { errorToast } from "@/app/util/functions/toast"
 import { useOtherBuilder } from "@/app/context/itemBuilder/Other"
 import { IBuildingOther, IOrderItem } from "@td/types"
 import { useContrDialog } from "../../ControlledDialog"
+import { useItemBuilder } from "@/app/context/itemBuilder"
+import { v4 as uuidv4 } from "uuid"
 
 export const Bottom = () => {
+  const { currentOthers, nextButtonRef, discount, orderId, observations } =
+    useOtherBuilder()
+
   const {
-    currentOthers,
-    nextButtonRef,
-    discount,
-    addMultipleItems,
-    orderId,
-    observations,
-  } = useOtherBuilder()
+    addMultipleItemsToOrder,
+    addMultipleItemsToPromo,
+    currentPromo,
+    currentPromoBuilder,
+    currentPromoCode,
+    currentPromoBuilderCode,
+  } = useItemBuilder()
   const { setOpen } = useContrDialog()
 
   const othersValue = currentOthers.reduce(
@@ -40,8 +45,22 @@ export const Bottom = () => {
       initialValue: getOtherValue(x),
       observations: observations ? observations.trim() : undefined,
       discount,
+      promo:
+        currentPromo && currentPromoBuilder
+          ? {
+              id: currentPromo.id,
+              code: currentPromoCode,
+              builderId: currentPromoBuilder.id,
+              builderCode: currentPromoBuilderCode,
+              optionCode: uuidv4(),
+            }
+          : undefined,
     }))
-    await addMultipleItems(others)
+    if (!currentPromo) {
+      await addMultipleItemsToOrder(others, orderId)
+    } else {
+      addMultipleItemsToPromo(others)
+    }
     setOpen(false)
   }
 

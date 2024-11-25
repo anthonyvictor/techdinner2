@@ -1,16 +1,14 @@
 import { useHome } from "@/app/context/Home"
+import { useOrders } from "@/app/context/Orders"
 import { Badge, Flex, IconButton } from "@radix-ui/themes"
 import { getDuration } from "@td/functions"
 import { useEffect, useState } from "react"
 import { IoCloseCircle, IoMenu } from "react-icons/io5"
 
 export const Header = () => {
-  const {
-    currentOrder: _currOrderId,
-    getCurrentOrder,
-    closeOrder,
-    setShowPanel,
-  } = useHome()
+  const { closeOrder, setShowPanel } = useHome()
+
+  const { currentOrder: _currOrderId, getCurrentOrder } = useOrders()
 
   const currentOrder = _currOrderId ? getCurrentOrder() : undefined
   const [duration, setDuration] = useState(getDuration(currentOrder?.createdAt))

@@ -1,12 +1,11 @@
 import { ContrDialog } from "@/app/components/ControlledDialog"
 import { OtherBuilder } from "@/app/components/itemBuilder/other"
-import { ItemBuilder } from "@/app/components/itemBuilder/ItemBuilder"
+import { ItemBuilderPage } from "@/app/components/itemBuilder/ItemBuilder"
 import { MyAvatar } from "@/app/components/MyAvatar"
 import { MyCard } from "@/app/components/MyCard"
 import { Name } from "@/app/components/order/item/Name"
 import { Price } from "@/app/components/order/item/Price"
-import { useHome } from "@/app/context/Home"
-import { Flex, Separator, Text } from "@radix-ui/themes"
+import { Flex, Text } from "@radix-ui/themes"
 import { getOtherValue } from "@td/functions"
 import { getDiscountValue } from "@td/functions/src/calc"
 import { name } from "@td/functions/src/format"
@@ -15,9 +14,10 @@ import { FaWineBottle } from "react-icons/fa"
 import { Observations } from "@/app/components/order/item/Observations"
 import { Extras } from "@/app/components/order/item/Extras"
 import { Modifications } from "@/app/components/order/item/Modifications"
+import { useOrders } from "@/app/context/Orders"
 
 export const Other = ({ others }: { others: IOrderItemOther[] }) => {
-  const { currentOrder, addMultipleItems } = useHome()
+  const { currentOrder } = useOrders()
 
   const other = others[0]
   return (
@@ -61,13 +61,9 @@ export const Other = ({ others }: { others: IOrderItemOther[] }) => {
         </>
       }
     >
-      <ItemBuilder>
-        <OtherBuilder
-          other={other}
-          orderId={currentOrder ?? ""}
-          addMultipleItems={addMultipleItems}
-        />
-      </ItemBuilder>
+      <ItemBuilderPage>
+        <OtherBuilder other={other} orderId={currentOrder ?? ""} />
+      </ItemBuilderPage>
     </ContrDialog>
   )
 }

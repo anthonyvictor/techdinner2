@@ -16,9 +16,19 @@ import { errorToast } from "@/app/util/functions/toast"
 import { useState } from "react"
 import { Divide } from "./Divide"
 import { useContrDialog } from "../../ControlledDialog"
+import { useItemBuilder } from "@/app/context/itemBuilder"
+import { v4 as uuidv4 } from "uuid"
 
 export const Bottom = () => {
-  const { currentPizza, nextButtonRef, addMultipleItems } = usePizzaBuilder()
+  const { currentPizza, nextButtonRef } = usePizzaBuilder()
+  const {
+    addMultipleItemsToOrder,
+    addMultipleItemsToPromo,
+    currentPromo,
+    currentPromoBuilder,
+    currentPromoCode,
+    currentPromoBuilderCode,
+  } = useItemBuilder()
   const [divideModalOpen, setDivideModalOpen] = useState(false)
   const { setOpen } = useContrDialog()
 
@@ -57,9 +67,23 @@ export const Bottom = () => {
       id: orderId ? basePizza.id : "",
       orderId,
       initialValue: getPizzaValue(currentPizza),
+      promo:
+        currentPromo && currentPromoBuilder
+          ? {
+              id: currentPromo.id,
+              code: currentPromoCode,
+              builderId: currentPromoBuilder.id,
+              builderCode: currentPromoBuilderCode,
+              optionCode: uuidv4(),
+            }
+          : undefined,
     }
 
-    await addMultipleItems([pizza])
+    if (!currentPromo) {
+      await addMultipleItemsToOrder([pizza], orderId)
+    } else {
+      await addMultipleItemsToPromo([pizza])
+    }
     // await addOrUpdateItem(pizza)
     setOpen(false)
   }

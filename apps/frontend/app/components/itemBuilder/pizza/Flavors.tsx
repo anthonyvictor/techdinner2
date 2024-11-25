@@ -22,23 +22,25 @@ export const Flavors = () => {
             basis-1 overflow-y-auto gap-2
             items-start content-start"
       >
-        {filteredGroups.map((group) => (
-          <Fragment key={group.id}>
-            <ItemCategory category={group.fullName} />
-            <>
-              <div
-                className="flex flex-wrap 
+        {filteredGroups
+          .filter((x) => x.flavors.length)
+          .map((group) => (
+            <Fragment key={group.id}>
+              <ItemCategory category={group.fullName} />
+              <>
+                <div
+                  className="flex flex-wrap 
             w-full  
              gap-2
             items-start content-start"
-              >
-                {group.flavors.map((flavor) => (
-                  <Flavor key={flavor.id} flavor={flavor} />
-                ))}
-              </div>
-            </>
-          </Fragment>
-        ))}
+                >
+                  {group.flavors.map((flavor) => (
+                    <Flavor key={flavor.id} flavor={flavor} />
+                  ))}
+                </div>
+              </>
+            </Fragment>
+          ))}
       </Flex>
 
       <SelectedFlavors />

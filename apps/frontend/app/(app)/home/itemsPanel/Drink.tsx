@@ -1,9 +1,9 @@
 import { ContrDialog } from "@/app/components/ControlledDialog"
 import { DrinkBuilder } from "@/app/components/itemBuilder/drink"
-import { ItemBuilder } from "@/app/components/itemBuilder/ItemBuilder"
+import { ItemBuilderPage } from "@/app/components/itemBuilder/ItemBuilder"
 import { MyAvatar } from "@/app/components/MyAvatar"
-import { useHome } from "@/app/context/Home"
-import { Avatar, Card, Flex, Strong, Text } from "@radix-ui/themes"
+import { useOrders } from "@/app/context/Orders"
+import { Card, Flex, Strong, Text } from "@radix-ui/themes"
 import { getDrinkStock, getDrinkValue } from "@td/functions"
 import { currency, name } from "@td/functions/src/format"
 import { IBuildingDrink, IOrderItemDrink } from "@td/types"
@@ -14,7 +14,7 @@ export const Drink = ({
 }: {
   drink: IBuildingDrink | IOrderItemDrink
 }) => {
-  const { currentOrder, addMultipleItems } = useHome()
+  const { currentOrder } = useOrders()
   return (
     <ContrDialog
       trigger={
@@ -65,13 +65,9 @@ export const Drink = ({
         </Card>
       }
     >
-      <ItemBuilder>
-        <DrinkBuilder
-          drink={drink}
-          orderId={currentOrder ?? ""}
-          addMultipleItems={addMultipleItems}
-        />
-      </ItemBuilder>
+      <ItemBuilderPage>
+        <DrinkBuilder drink={drink} orderId={currentOrder ?? ""} />
+      </ItemBuilderPage>
     </ContrDialog>
   )
 }

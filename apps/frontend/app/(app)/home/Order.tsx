@@ -1,7 +1,7 @@
 "use client"
 import { MyAvatar } from "@/app/components/MyAvatar"
-import { useHome } from "@/app/context/Home"
-import { Avatar, Badge, Box, Card, Flex, Text } from "@radix-ui/themes"
+import { useOrders } from "@/app/context/Orders"
+import { Badge, Box, Card, Flex, Text } from "@radix-ui/themes"
 import {
   getCustomerName,
   getDuration,
@@ -29,7 +29,7 @@ export const Order = ({ order }: { order: IOrder }) => {
   const allDone = doneItems.length && itemsWithSteps.length === doneItems.length
   const somePaused = itemsWithSteps.some((x) => x.pausedUntil)
 
-  const { openOrder } = useHome()
+  const { setCurrentOrder } = useOrders()
 
   const [duration, setDuration] = useState(getDuration(order?.createdAt))
 
@@ -59,7 +59,7 @@ export const Order = ({ order }: { order: IOrder }) => {
       }}
       className="w-full relative"
     >
-      <button onClick={() => openOrder(order)}>
+      <button onClick={() => setCurrentOrder(order.id)}>
         <Flex gap="2" align={"center"} className="justify-stretch">
           <Box className="relative">
             <MyAvatar

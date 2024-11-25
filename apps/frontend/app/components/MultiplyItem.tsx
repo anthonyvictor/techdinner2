@@ -4,6 +4,7 @@ import { createRef, useState } from "react"
 import { ModalBottom } from "./ModalBottom"
 import { SetState } from "../infra/types/setState"
 import { Ref } from "../infra/types/ref"
+import { numbers } from "../infra/data/ascii"
 
 export const Multiply = ({
   isOpen,
@@ -38,11 +39,7 @@ export const Multiply = ({
                 setValue(Number(e.target.value.replace(/[^0-9]/g, "")))
               }}
               onKeyDown={(e) => {
-                if (
-                  ![..."0123456789".split(""), "Backspace", "Enter"].includes(
-                    e.key,
-                  )
-                ) {
+                if (!numbers.includes(e.key)) {
                   e.preventDefault()
                 } else if (e.key === "Enter") {
                   if (value > 0) nextRef.current?.click()

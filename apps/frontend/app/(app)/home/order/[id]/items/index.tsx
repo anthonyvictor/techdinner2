@@ -1,4 +1,3 @@
-import { useHome } from "@/app/context/Home"
 import { itemsMenu } from "@/app/infra/data/itemsMenu"
 import { Flex } from "@radix-ui/themes"
 import {
@@ -15,13 +14,10 @@ import { Drink } from "./Drink"
 import { toPositive } from "@td/functions/src/calc"
 import { getItemValue } from "@td/functions"
 import { Other } from "./Other"
+import { useOrders } from "@/app/context/Orders"
 
 export const ItemsBox = () => {
-  const {
-    currentOrder: currOrderId,
-    getCurrentOrder,
-    addMultipleItems,
-  } = useHome()
+  const { currentOrder: currOrderId, getCurrentOrder } = useOrders()
 
   const currentOrder = currOrderId ? getCurrentOrder() : undefined
 
@@ -34,7 +30,7 @@ export const ItemsBox = () => {
       let i = _groupedItems.findIndex(([y]) => {
         const arr = [
           x.type === y.type,
-          y.comboId === x.comboId,
+          y.promo === x.promo,
           toPositive(y.createdAt.getTime() - x.createdAt.getTime()) /
             1000 /
             60 <
@@ -92,7 +88,6 @@ export const ItemsBox = () => {
             key={item.name}
             item={item}
             orderId={currentOrder.id}
-            addMultipleItems={addMultipleItems}
           />
         ))}
       </Flex>

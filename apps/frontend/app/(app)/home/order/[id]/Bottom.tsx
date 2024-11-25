@@ -1,10 +1,10 @@
-import { useHome } from "@/app/context/Home";
-import { Button, Flex, IconButton } from "@radix-ui/themes";
-import { FaCheck, FaPrint, FaTrash } from "react-icons/fa";
+import { useOrders } from "@/app/context/Orders"
+import { Button, Flex, IconButton } from "@radix-ui/themes"
+import { FaCheck, FaPrint, FaTrash } from "react-icons/fa"
 
 export const Bottom = () => {
-  const { currentOrder } = useHome();
-  if (!currentOrder) return <></>;
+  const { currentOrder } = useOrders()
+  if (!currentOrder) return <></>
   return (
     <Flex className="w-full " gap="1" justify={"center"}>
       <IconButton color="red">
@@ -17,5 +17,5 @@ export const Bottom = () => {
         <FaCheck /> Finalizar
       </Button>
     </Flex>
-  );
-};
+  )
+}

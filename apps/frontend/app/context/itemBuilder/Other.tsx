@@ -24,6 +24,7 @@ import { v4 as uuidv4 } from "uuid"
 import { SetState } from "@/app/infra/types/setState"
 import { Ref } from "@/app/infra/types/ref"
 import { getOtherValue, groupSelectedOthers } from "@td/functions"
+import { IPromoItemOther } from "@td/types/src/promo"
 
 interface IOtherBuilderContext {
   currentOthers: IBuildingOther[]
@@ -33,7 +34,6 @@ interface IOtherBuilderContext {
 
   setVariation: (variation: IOtherVariation) => void
 
-  addMultipleItems: (items: IOrderItem[]) => void
   orderId: string
 
   observations: string | undefined
@@ -64,6 +64,7 @@ interface IOtherBuilderContext {
   setSelectComponentsId: SetState<string | undefined>
 
   nextButtonRef: Ref<HTMLButtonElement | undefined>
+  promoItems?: IPromoItemOther[]
 }
 
 const OtherBuilderContext = createContext<IOtherBuilderContext>(
@@ -73,13 +74,13 @@ const OtherBuilderContext = createContext<IOtherBuilderContext>(
 export const OtherBuilderProvider = ({
   children,
   defaultOther,
-  addMultipleItems,
   orderId,
+  promoItems,
 }: {
   children: ReactNode
   defaultOther?: IOrderItemOther
-  addMultipleItems: (items: IOrderItem[]) => void
   orderId: string
+  promoItems?: IPromoItemOther[]
 }) => {
   const [isLoading, setIsLoading] = useState(true)
   const [currentOthers, setCurrentOthers] = useState<IBuildingOther[]>([])
@@ -207,7 +208,6 @@ export const OtherBuilderProvider = ({
         setObservations,
         setDiscount,
 
-        addMultipleItems,
         orderId,
 
         addOthers,
@@ -235,6 +235,7 @@ export const OtherBuilderProvider = ({
         setSelectComponentsId,
 
         otherClick,
+        promoItems,
       }}
     >
       {children}

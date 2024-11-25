@@ -23,6 +23,8 @@ import { api } from "@/app/infra/util/api"
 import { v4 as uuidv4 } from "uuid"
 import { SetState } from "@/app/infra/types/setState"
 import { Ref } from "@/app/infra/types/ref"
+import { IPromoItemDrink } from "@td/types/src/promo"
+import { alertToast } from "@/app/util/functions/toast"
 
 interface IDrinkBuilderContext {
   currentDrinks: IBuildingDrink[]
@@ -31,7 +33,6 @@ interface IDrinkBuilderContext {
 
   setFlavor: (flavor: IDrinkFlavor) => void
 
-  addMultipleItems: (items: IOrderItem[]) => void
   orderId: string
 
   observations: string | undefined
@@ -60,6 +61,7 @@ interface IDrinkBuilderContext {
   setSelectFlavorId: SetState<string | undefined>
 
   nextButtonRef: Ref<HTMLButtonElement | undefined>
+  promoItems?: IPromoItemDrink[]
 }
 
 const DrinkBuilderContext = createContext<IDrinkBuilderContext>(
@@ -69,12 +71,12 @@ const DrinkBuilderContext = createContext<IDrinkBuilderContext>(
 export const DrinkBuilderProvider = ({
   children,
   defaultDrink,
-  addMultipleItems,
+  promoItems,
   orderId,
 }: {
   children: ReactNode
+  promoItems?: IPromoItemDrink[]
   defaultDrink?: IOrderItemDrink
-  addMultipleItems: (items: IOrderItem[]) => void
   orderId: string
 }) => {
   const [isLoading, setIsLoading] = useState(true)
@@ -154,6 +156,10 @@ export const DrinkBuilderProvider = ({
   const [observations, setObservations] = useState<string>()
 
   const drinkClick = (drink: IDrink | IBuildingDrink | undefined) => {
+    if (promoItems && currentDrinks.length === 1) {
+      alertToast("Máximo de bebidas alcançadas!")
+      return
+    }
     if (drink?.flavors?.length) {
       setSelectFlavorId(drink.id)
     } else if (drink) {
@@ -189,7 +195,6 @@ export const DrinkBuilderProvider = ({
         setObservations,
         setDiscount,
 
-        addMultipleItems,
         orderId,
 
         addDrinks,
@@ -213,6 +218,7 @@ export const DrinkBuilderProvider = ({
         selectFlavorId,
         setSelectFlavorId,
         drinkClick,
+        promoItems,
       }}
     >
       {children}

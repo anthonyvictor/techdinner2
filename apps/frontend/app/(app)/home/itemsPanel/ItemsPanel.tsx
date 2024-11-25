@@ -26,7 +26,7 @@ import { Pizza } from "./Pizza"
 import { Other } from "./Other"
 import { Promo } from "./Promo"
 import { api } from "@/app/infra/util/api"
-import { ItemBuilder } from "@/app/components/itemBuilder/ItemBuilder"
+import { ItemBuilderPage } from "@/app/components/itemBuilder/ItemBuilder"
 import { ContrDialog } from "@/app/components/ControlledDialog"
 import { ItemPanelButton } from "./ItemPanelButton"
 
@@ -36,13 +36,7 @@ interface IItems {
   others: IBuildingOther[]
   promos: IBuildingPromo[]
 }
-export const ItemsPanel = ({
-  orderId,
-  addMultipleItems,
-}: {
-  addMultipleItems: (items: IOrderItem[]) => void
-  orderId: string
-}) => {
+export const ItemsPanel = ({ orderId }: { orderId: string }) => {
   const [items, setItems] = useState<IItems>({
     pizzas: [],
     drinks: [],
@@ -74,12 +68,7 @@ export const ItemsPanel = ({
         overflowY={"hidden"}
       >
         {itemsMenu.map((item) => (
-          <ItemPanelButton
-            key={item.name}
-            item={item}
-            orderId={orderId}
-            addMultipleItems={addMultipleItems}
-          />
+          <ItemPanelButton key={item.name} item={item} orderId={orderId} />
         ))}
       </Flex>
       <ItemsContainer>
@@ -159,6 +148,7 @@ export const ItemsPanel = ({
           .map((others) => (
             <Flex
               direction={"column"}
+              className="max-[1366px]:hidden"
               gap="2"
               key={others.reduce(
                 (acc, other) => `${acc}-${other?.id ?? "x"}`,

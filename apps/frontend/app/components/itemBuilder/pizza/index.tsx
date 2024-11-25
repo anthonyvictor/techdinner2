@@ -22,7 +22,7 @@ import { Flavors } from "./Flavors"
 import { useFuncAnywhere } from "@/app/util/hooks/funcAnywhere"
 import { useCurrentWindow } from "@/app/context/CurrentWindow"
 import { useCurrentWindowSetter } from "@/app/util/hooks/currentWindowSetter"
-import { useItemBuilder } from "../ItemBuilder"
+import { useItemBuilderPage } from "../ItemBuilder"
 import { useSelectItem } from "@/app/util/hooks/selectItem"
 import { useArrowAnywhere } from "@/app/util/hooks/arrowAnywhere"
 import { useAddSubtractAnywhere } from "@/app/util/hooks/addSubtractAnywhere"
@@ -31,20 +31,19 @@ import { ItemObservations } from "../Observations"
 import { ItemSearch } from "../Search"
 import { SetState } from "@/app/infra/types/setState"
 import { ItemSelect } from "../Select"
+import { IPromoItem, IPromoItemPizza } from "@td/types/src/promo"
+import { useItemBuilder } from "@/app/context/itemBuilder"
 
 export const PizzaBuilder = ({
   pizza,
-  addMultipleItems,
   orderId,
 }: {
   pizza?: IBuildingPizza
-  addMultipleItems: (items: IOrderItem[]) => void
   orderId: string
 }) => {
   return (
     <PizzaBuilderProvider
       defaultPizza={{ ...pizza, type: "pizza" } as IOrderItemPizza}
-      addMultipleItems={addMultipleItems}
       orderId={orderId}
     >
       <PizzaBuilderContent />
@@ -137,11 +136,14 @@ export const PizzaBuilderContent = () => {
     [filteredGroups, currentPizza, hoveredFlavor, currentWindow],
   )
 
-  const { setAskToClose, setAskToCloseTitle } = useItemBuilder()
+  const { setAskToClose, setAskToCloseTitle } = useItemBuilderPage()
+  const { currentPromoBuilder } = useItemBuilder()
 
   useEffect(() => {
-    setAskToClose(true)
-    setAskToCloseTitle("Cancelar adição / edição deste item?")
+    if (!currentPromoBuilder) {
+      setAskToClose(true)
+      setAskToCloseTitle("Cancelar adição / edição deste item?")
+    }
   }, []) //eslint-disable-line
 
   return (

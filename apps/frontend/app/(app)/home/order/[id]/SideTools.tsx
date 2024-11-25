@@ -1,11 +1,11 @@
-import { useHome } from "@/app/context/Home"
+import { useOrders } from "@/app/context/Orders"
 import { Card, Flex, IconButton } from "@radix-ui/themes"
 import { IconBase, IconType } from "react-icons"
 import { FaClipboard, FaFolderOpen, FaMotorcycle } from "react-icons/fa"
 import { IoCheckmarkCircle, IoCloseCircle } from "react-icons/io5"
 
 export const SideTools = () => {
-  const { currentOrder: currOrderId, getCurrentOrder } = useHome()
+  const { currentOrder: currOrderId, getCurrentOrder } = useOrders()
 
   const currentOrder = currOrderId ? getCurrentOrder() : undefined
 

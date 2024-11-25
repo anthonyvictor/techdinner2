@@ -9,8 +9,13 @@ import { ItemCategory } from "../Category"
 import { Ref } from "@/app/infra/types/ref"
 
 export const Drinks = () => {
-  const { currentDrinks, removeDrink, filteredCategories, drinksListRef } =
-    useDrinkBuilder()
+  const {
+    currentDrinks,
+    removeDrink,
+    filteredCategories,
+    drinksListRef,
+    promoItems,
+  } = useDrinkBuilder()
 
   const groupedDrinks = currentDrinks?.length
     ? groupSelectedDrinks(currentDrinks)
@@ -33,9 +38,15 @@ export const Drinks = () => {
           <Fragment key={category.id}>
             <ItemCategory category={category.fullName} />
             <div className="flex flex-wrap w-full gap-2 items-start content-start ">
-              {(category.drinks ?? []).map((drink) => (
-                <Drink key={drink.id} drink={drink} />
-              ))}
+              {(category.drinks ?? [])
+                .filter((x) =>
+                  !promoItems?.length
+                    ? true
+                    : promoItems.some((y) => y?.drinkId === x.id),
+                )
+                .map((drink) => (
+                  <Drink key={drink.id} drink={drink} />
+                ))}
             </div>
           </Fragment>
         ))}

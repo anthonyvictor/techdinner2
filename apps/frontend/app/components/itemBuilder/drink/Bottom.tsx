@@ -8,10 +8,20 @@ import { errorToast } from "@/app/util/functions/toast"
 import { useDrinkBuilder } from "@/app/context/itemBuilder/Drink"
 import { IBuildingDrink, IOrderItem } from "@td/types"
 import { useContrDialog } from "../../ControlledDialog"
+import { useItemBuilder } from "@/app/context/itemBuilder"
+import { v4 as uuidv4 } from "uuid"
 
 export const Bottom = () => {
-  const { currentDrinks, nextButtonRef, discount, addMultipleItems, orderId } =
-    useDrinkBuilder()
+  const { currentDrinks, nextButtonRef, discount, orderId } = useDrinkBuilder()
+
+  const {
+    addMultipleItemsToOrder,
+    addMultipleItemsToPromo,
+    currentPromo,
+    currentPromoBuilder,
+    currentPromoCode,
+    currentPromoBuilderCode,
+  } = useItemBuilder()
   const { setOpen } = useContrDialog()
 
   const drinksValue = currentDrinks.reduce(
@@ -26,14 +36,29 @@ export const Bottom = () => {
   }, 0)
 
   const save = async () => {
+    const promoCode = currentPromo && currentPromoBuilder ? uuidv4() : ""
     const drinks: IOrderItem[] = currentDrinks.map((x) => ({
       ...x,
       id: orderId ? x.id : "",
       orderId,
       type: "drink",
       initialValue: getDrinkValue(x),
+      promo:
+        currentPromo && currentPromoBuilder
+          ? {
+              id: currentPromo.id,
+              code: currentPromoCode,
+              builderId: currentPromoBuilder.id,
+              builderCode: currentPromoBuilderCode,
+              optionCode: uuidv4(),
+            }
+          : undefined,
     }))
-    await addMultipleItems(drinks)
+    if (!currentPromo) {
+      await addMultipleItemsToOrder(drinks, orderId)
+    } else {
+      await addMultipleItemsToPromo(drinks)
+    }
     setOpen(false)
   }
 

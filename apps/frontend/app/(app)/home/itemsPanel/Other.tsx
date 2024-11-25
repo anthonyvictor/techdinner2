@@ -1,17 +1,9 @@
 import { ContrDialog } from "@/app/components/ControlledDialog"
-import { ItemBuilder } from "@/app/components/itemBuilder/ItemBuilder"
+import { ItemBuilderPage } from "@/app/components/itemBuilder/ItemBuilder"
 import { OtherBuilder } from "@/app/components/itemBuilder/other"
 import { MyAvatar } from "@/app/components/MyAvatar"
-import { useHome } from "@/app/context/Home"
-import {
-  Avatar,
-  Button,
-  Card,
-  Dialog,
-  Flex,
-  Strong,
-  Text,
-} from "@radix-ui/themes"
+import { useOrders } from "@/app/context/Orders"
+import { Card, Flex, Strong, Text } from "@radix-ui/themes"
 import { getOtherStock, getOtherValue } from "@td/functions"
 import { currency, name } from "@td/functions/src/format"
 import { IBuildingOther, IOrderItemOther } from "@td/types"
@@ -22,7 +14,7 @@ export const Other = ({
 }: {
   other: IBuildingOther | IOrderItemOther
 }) => {
-  const { currentOrder, addMultipleItems } = useHome()
+  const { currentOrder } = useOrders()
 
   return (
     <ContrDialog
@@ -73,13 +65,9 @@ export const Other = ({
         </Card>
       }
     >
-      <ItemBuilder>
-        <OtherBuilder
-          other={other}
-          orderId={currentOrder ?? ""}
-          addMultipleItems={addMultipleItems}
-        />
-      </ItemBuilder>
+      <ItemBuilderPage>
+        <OtherBuilder other={other} orderId={currentOrder ?? ""} />
+      </ItemBuilderPage>
     </ContrDialog>
   )
 }

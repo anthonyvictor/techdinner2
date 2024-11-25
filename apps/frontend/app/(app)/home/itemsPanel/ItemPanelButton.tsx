@@ -1,16 +1,14 @@
 import { ContrDialog } from "@/app/components/ControlledDialog"
-import { ItemBuilder } from "@/app/components/itemBuilder/ItemBuilder"
+import { ItemBuilderPage } from "@/app/components/itemBuilder/ItemBuilder"
 import { IItemMenu } from "@/app/infra/types/itemMenu"
 import { Button, Flex, Text } from "@radix-ui/themes"
 import { IOrderItem } from "@td/types"
 
 export const ItemPanelButton = ({
   item,
-  addMultipleItems,
   orderId,
 }: {
   item: IItemMenu
-  addMultipleItems: (items: IOrderItem[]) => void
   orderId: string
 }) => {
   return (
@@ -26,15 +24,9 @@ export const ItemPanelButton = ({
         </Button>
       }
     >
-      <ItemBuilder>
-        {
-          <item.component
-            item={item}
-            addMultipleItems={addMultipleItems}
-            orderId={orderId}
-          />
-        }
-      </ItemBuilder>
+      <ItemBuilderPage>
+        {<item.component item={item} orderId={orderId} />}
+      </ItemBuilderPage>
     </ContrDialog>
   )
 }

@@ -4,6 +4,7 @@ import { IDiscount } from "@td/types"
 import { useRef, useState } from "react"
 import { MdArrowDropDown } from "react-icons/md"
 import { Ref } from "../../infra/types/ref"
+import { currencyNumbers, numbers } from "@/app/infra/data/ascii"
 
 export const ItemDiscount = ({
   preDiscounts,
@@ -62,9 +63,7 @@ export const ItemDiscount = ({
         placeholder="Desconto..."
         value={(discountString ?? "")?.replace(/[^0-9,.]/g, "")}
         onKeyDown={(e) => {
-          if (
-            ![..."0123456789,".split(""), "Backspace", "Enter"].includes(e.key)
-          ) {
+          if (!currencyNumbers.includes(e.key)) {
             e.preventDefault()
           }
         }}

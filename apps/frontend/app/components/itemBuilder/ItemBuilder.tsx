@@ -10,62 +10,33 @@ import {
 import { createContext, ReactNode, useContext, useState } from "react"
 import { useContrDialog } from "../ControlledDialog"
 
-type IITemBuilderContext = {
+type IITemBuilderPageContext = {
   askToClose: boolean
   askToCloseTitle?: string
   setAskToClose: SetState<boolean>
   setAskToCloseTitle: SetState<string>
 }
 
-const ItemBuilderContext = createContext<IITemBuilderContext>(
-  {} as IITemBuilderContext,
+const ItemBuilderPageContext = createContext<IITemBuilderPageContext>(
+  {} as IITemBuilderPageContext,
 )
 
-export const ItemBuilder = ({ children }: { children: ReactNode }) => {
-  const [askToClose, setAskToClose] = useState(false)
+export const ItemBuilderPage = ({
+  children,
+  askToLeave,
+}: {
+  children: ReactNode
+  askToLeave?: boolean
+}) => {
+  const [askToClose, setAskToClose] = useState(!!askToLeave)
   const [showAsk, setShowAsk] = useState(false)
   const [askToCloseTitle, setAskToCloseTitle] = useState(
     "Deseja realmente sair?",
   )
   const { setOpen } = useContrDialog()
 
-  return (
-    <ItemBuilderContext.Provider
-      value={{
-        askToClose,
-        setAskToClose,
-        askToCloseTitle,
-        setAskToCloseTitle,
-      }}
-    >
-      <Dialog.Content
-        onInteractOutside={(e) => {
-          if (askToClose) {
-            e.preventDefault()
-            if (e.target === e.currentTarget) {
-              setShowAsk(true)
-            }
-          }
-        }}
-        onEscapeKeyDown={(e) => {
-          if (askToClose) {
-            e.preventDefault()
-            setShowAsk(true)
-          }
-        }}
-        size={"2"}
-        minWidth={"80svw"}
-        maxWidth={"98svw"}
-        minHeight={"89svh"}
-        maxHeight={"92svh"}
-        className="flex flex-col"
-      >
-        <VisuallyHidden>
-          <Dialog.Title>Build Item</Dialog.Title>
-          <Dialog.Description>Build item</Dialog.Description>
-        </VisuallyHidden>
-        {children}
-      </Dialog.Content>
+  const AskToLeave = () => {
+    return (
       <Dialog.Root
         open={showAsk}
         onOpenChange={(e) => {
@@ -102,8 +73,49 @@ export const ItemBuilder = ({ children }: { children: ReactNode }) => {
           </Flex>
         </Dialog.Content>
       </Dialog.Root>
-    </ItemBuilderContext.Provider>
+    )
+  }
+
+  return (
+    <ItemBuilderPageContext.Provider
+      value={{
+        askToClose,
+        setAskToClose,
+        askToCloseTitle,
+        setAskToCloseTitle,
+      }}
+    >
+      <Dialog.Content
+        onInteractOutside={(e) => {
+          if (askToClose) {
+            e.preventDefault()
+            if (e.target === e.currentTarget) {
+              setShowAsk(true)
+            }
+          }
+        }}
+        onEscapeKeyDown={(e) => {
+          if (askToClose) {
+            e.preventDefault()
+            setShowAsk(true)
+          }
+        }}
+        size={"2"}
+        minWidth={"80svw"}
+        maxWidth={"98svw"}
+        minHeight={"89svh"}
+        maxHeight={"92svh"}
+        className="flex flex-col"
+      >
+        <VisuallyHidden>
+          <Dialog.Title>Build Item</Dialog.Title>
+          <Dialog.Description>Build item</Dialog.Description>
+        </VisuallyHidden>
+        {children}
+      </Dialog.Content>
+      <AskToLeave />
+    </ItemBuilderPageContext.Provider>
   )
 }
 
-export const useItemBuilder = () => useContext(ItemBuilderContext)
+export const useItemBuilderPage = () => useContext(ItemBuilderPageContext)

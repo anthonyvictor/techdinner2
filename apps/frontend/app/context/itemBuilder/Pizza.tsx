@@ -29,6 +29,10 @@ import { api } from "@/app/infra/util/api"
 import { v4 as uuidv4 } from "uuid"
 import { SetState } from "@/app/infra/types/setState"
 import { Ref } from "@/app/infra/types/ref"
+import { IPromoItemPizza } from "@td/types/src/promo"
+import { merge } from "@td/functions"
+import { alertToast } from "@/app/util/functions/toast"
+import { useItemBuilder } from "."
 
 interface IPizzaBuilderContext {
   currentPizza: IBuildingPizza
@@ -48,8 +52,6 @@ interface IPizzaBuilderContext {
   searchFlavorRef: Ref<HTMLInputElement | undefined>
   searchFlavors: string
   setSearchFlavors: SetState<string>
-
-  addMultipleItems: (items: IOrderItem[]) => void
   orderId: string
 
   hoveredFlavor: IPizzaFlavor | undefined
@@ -76,12 +78,10 @@ const PizzaBuilderContext = createContext<IPizzaBuilderContext>(
 export const PizzaBuilderProvider = ({
   children,
   defaultPizza,
-  addMultipleItems,
   orderId,
 }: {
   children: ReactNode
   defaultPizza?: IOrderItemPizza
-  addMultipleItems: (items: IOrderItem[]) => void
   orderId: string
 }) => {
   const [isLoading, setIsLoading] = useState(true)
@@ -116,9 +116,25 @@ export const PizzaBuilderProvider = ({
     discounts: [],
   })
 
+  const { currentPromoBuilder, currentPromoItems } = useItemBuilder()
+
+  const getGroups = () => {
+    return currentPromoBuilder?.type === "pizza" &&
+      currentPromoBuilder?.flavors?.length
+      ? [
+          ...builder.groups.map((g) => ({
+            ...g,
+            flavors: g.flavors.filter((f) =>
+              (currentPromoBuilder?.flavors ?? []).some((pf) => pf.id === f.id),
+            ),
+          })),
+        ]
+      : builder.groups
+  }
+
   const filteredGroups =
     builder.groups?.length && searchFlavors
-      ? builder.groups
+      ? getGroups()
           .map((group) => {
             const filteredFlavors = group.flavors.filter((flavor) => {
               const o = objToString(flavor, [
@@ -133,22 +149,65 @@ export const PizzaBuilderProvider = ({
             return { ...group, flavors: filteredFlavors }
           })
           .filter((group) => group.flavors.length > 0)
-      : builder.groups
+      : getGroups()
 
+  const getSizeByBuilderSameSize = (
+    sizes: IPizzaSize[],
+    builder: IPromoItemPizza,
+  ) => {
+    return (
+      sizes.filter(
+        (x) =>
+          x.id ===
+          (
+            currentPromoItems.find(
+              (y) => y.promo?.builderId === builder.sameSizeAs,
+            ) as IOrderItemPizza
+          ).size.id,
+      ) ?? sizes
+    )
+  }
   useLayoutEffect(() => {
     ;(async () => {
       const res = await api("pizza-builder")
 
       if (res.ok) {
         const _data = JSON.stringify(await res.json())
-        const data = JSON.parse(_data, dateTimeReviver)
+        const { sizes, crusts, doughThicknesses, doughTypes, ...data } =
+          JSON.parse(_data, dateTimeReviver) as IPizzaBuilder
 
-        setBuilder(data)
+        const promoPizza =
+          currentPromoBuilder?.type === "pizza"
+            ? (currentPromoBuilder as IPromoItemPizza)
+            : undefined
+
+        const _sizes = (promoPizza?.sizes as IPizzaSize[])?.length
+          ? (promoPizza?.sizes as IPizzaSize[])
+          : promoPizza?.sameSizeAs
+            ? getSizeByBuilderSameSize(sizes, promoPizza)
+            : sizes
+        const _crusts = promoPizza?.crusts?.length
+          ? merge(crusts, promoPizza?.crusts)
+          : crusts
+        const _doughThicknesses = promoPizza?.doughThicknesses?.length
+          ? merge(doughThicknesses, promoPizza?.doughThicknesses)
+          : doughThicknesses
+        const _doughTypes = promoPizza?.doughTypes?.length
+          ? merge(doughTypes, promoPizza?.doughTypes)
+          : doughTypes
+
+        setBuilder({
+          sizes: _sizes,
+          crusts: _crusts,
+          doughThicknesses: _doughThicknesses,
+          doughTypes: _doughTypes,
+          ...data,
+        })
       }
 
       setIsLoading(false)
     })()
-  }, [])
+  }, []) //eslint-disable-line
 
   useEffect(() => {
     if (!isLoading) {
@@ -160,6 +219,8 @@ export const PizzaBuilderProvider = ({
           })),
         })
       } else {
+        const size = builder.sizes.length === 1 ? builder.sizes[0] : undefined
+
         const crust = builder.crusts.find(
           (crust) => crust.isDefault,
         ) as IPizzaCrust
@@ -184,7 +245,7 @@ export const PizzaBuilderProvider = ({
           bakingLevel: doughBakingLevel,
         }
 
-        setCurrentPizza((prev) => ({ ...prev, crust, dough }))
+        setCurrentPizza((prev) => ({ ...prev, size, crust, dough }))
       }
     }
   }, [builder]) //eslint-disable-line
@@ -239,6 +300,14 @@ export const PizzaBuilderProvider = ({
   }
 
   const addFlavor = (flavor: IPizzaFlavor | IBuildingPizzaFlavor) => {
+    if (
+      currentPromoBuilder?.type === "pizza" &&
+      currentPizza.size &&
+      currentPizza.size.maxflavors === currentPizza.flavors.length
+    ) {
+      alertToast("Máximo de sabores atingido!")
+      return
+    }
     if ((flavor as IBuildingPizzaFlavor)?.code) {
       const index = currentPizza.flavors.findIndex(
         (x) => x.code === (flavor as IBuildingPizzaFlavor).code,
@@ -285,7 +354,6 @@ export const PizzaBuilderProvider = ({
         setObservations,
         setDiscount,
 
-        addMultipleItems,
         orderId,
 
         sizesListRef,

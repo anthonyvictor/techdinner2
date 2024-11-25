@@ -10,6 +10,7 @@ import { getPizzaValue } from "@td/functions"
 import { useState } from "react"
 import { usePizzaBuilder } from "@/app/context/itemBuilder/Pizza"
 import { SetState } from "@/app/infra/types/setState"
+import { useItemBuilder } from "@/app/context/itemBuilder"
 
 export const Divide = ({
   divideModalOpen,
@@ -18,7 +19,8 @@ export const Divide = ({
   divideModalOpen: boolean
   setDivideModalOpen: SetState<boolean>
 }) => {
-  const { currentPizza, nextButtonRef, addMultipleItems } = usePizzaBuilder()
+  const { currentPizza, nextButtonRef } = usePizzaBuilder()
+  const { addMultipleItemsToOrder } = useItemBuilder()
 
   const { setOpen } = useContrDialog()
 
@@ -57,7 +59,7 @@ export const Divide = ({
       initialValue: getPizzaValue(currentPizza),
     }))
 
-    await addMultipleItems(pizzas)
+    await addMultipleItemsToOrder(pizzas, orderId)
 
     setOpen(false)
   }

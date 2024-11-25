@@ -1,10 +1,10 @@
 import { ContrDialog } from "@/app/components/ControlledDialog"
-import { ItemBuilder } from "@/app/components/itemBuilder/ItemBuilder"
+import { ItemBuilderPage } from "@/app/components/itemBuilder/ItemBuilder"
 import { PizzaBuilder } from "@/app/components/itemBuilder/pizza"
 import { PizzaOptions } from "@/app/components/pizza/Options"
-import { useHome } from "@/app/context/Home"
+import { useOrders } from "@/app/context/Orders"
 import { Card, Flex, Strong, Text } from "@radix-ui/themes"
-import { getPizzaValue, getValueBySize } from "@td/functions"
+import { getPizzaValue } from "@td/functions"
 import { currency, name } from "@td/functions/src/format"
 import { IBuildingPizza, IOrderItemPizza, IPizzaSize } from "@td/types"
 
@@ -13,7 +13,7 @@ export const Pizza = ({
 }: {
   pizza: IBuildingPizza | IOrderItemPizza
 }) => {
-  const { addMultipleItems, currentOrder } = useHome()
+  const { currentOrder } = useOrders()
 
   return (
     <ContrDialog
@@ -45,13 +45,9 @@ export const Pizza = ({
         </Card>
       }
     >
-      <ItemBuilder>
-        <PizzaBuilder
-          pizza={pizza}
-          orderId={currentOrder ?? ""}
-          addMultipleItems={addMultipleItems}
-        />
-      </ItemBuilder>
+      <ItemBuilderPage>
+        <PizzaBuilder pizza={pizza} orderId={currentOrder ?? ""} />
+      </ItemBuilderPage>
     </ContrDialog>
   )
 }

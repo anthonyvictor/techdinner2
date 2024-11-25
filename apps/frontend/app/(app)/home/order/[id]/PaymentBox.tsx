@@ -1,4 +1,4 @@
-import { useHome } from "@/app/context/Home"
+import { useOrders } from "@/app/context/Orders"
 import { Color } from "@/app/infra/types/color"
 import {
   Box,
@@ -10,20 +10,14 @@ import {
   Strong,
   Text,
 } from "@radix-ui/themes"
-import {
-  getCustomerName,
-  getPayment,
-  getPaymentStatus,
-  getTotal,
-} from "@td/functions"
-import { applyDiscount } from "@td/functions/src/calc"
+import { getPayment, getPaymentStatus, getTotal } from "@td/functions"
 import { currency } from "@td/functions/src/format"
-import { useEffect, useState } from "react"
+import { useEffect } from "react"
 import { IconType } from "react-icons"
 import { FaCreditCard, FaMoneyBills, FaPix } from "react-icons/fa6"
 
 export const PaymentBox = () => {
-  const { currentOrder: currOrderId, getCurrentOrder } = useHome()
+  const { currentOrder: currOrderId, getCurrentOrder } = useOrders()
 
   const currentOrder = currOrderId ? getCurrentOrder() : undefined
 

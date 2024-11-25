@@ -1,4 +1,4 @@
-import { useHome } from "@/app/context/Home"
+import { useOrders } from "@/app/context/Orders"
 import { Color } from "@/app/infra/types/color"
 import { Flex, SegmentedControl, Select, Text } from "@radix-ui/themes"
 import { IOrderPlatform, IOrderType } from "@td/types"
@@ -19,7 +19,7 @@ export const TypeBox = () => {
     getCurrentOrder,
     setPlatform,
     setType,
-  } = useHome()
+  } = useOrders()
 
   const currentOrder = currOrderId ? getCurrentOrder() : undefined
 

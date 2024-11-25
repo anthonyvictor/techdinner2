@@ -1,13 +1,13 @@
 import { ContrDialog } from "@/app/components/ControlledDialog"
 import { DrinkBuilder } from "@/app/components/itemBuilder/drink"
-import { ItemBuilder } from "@/app/components/itemBuilder/ItemBuilder"
+import { ItemBuilderPage } from "@/app/components/itemBuilder/ItemBuilder"
 import { MyAvatar } from "@/app/components/MyAvatar"
 import { MyCard } from "@/app/components/MyCard"
 import { Name } from "@/app/components/order/item/Name"
 import { Observations } from "@/app/components/order/item/Observations"
 import { Price } from "@/app/components/order/item/Price"
-import { useHome } from "@/app/context/Home"
-import { Avatar, Flex, Text } from "@radix-ui/themes"
+import { useOrders } from "@/app/context/Orders"
+import { Flex, Text } from "@radix-ui/themes"
 import { getDrinkValue } from "@td/functions"
 import { getDiscountValue } from "@td/functions/src/calc"
 import { name } from "@td/functions/src/format"
@@ -15,7 +15,7 @@ import { IOrderItemDrink } from "@td/types"
 import { FaWineBottle } from "react-icons/fa"
 
 export const Drink = ({ drinks }: { drinks: IOrderItemDrink[] }) => {
-  const { currentOrder, addMultipleItems } = useHome()
+  const { currentOrder } = useOrders()
 
   const drink = drinks[0]
   return (
@@ -56,13 +56,9 @@ export const Drink = ({ drinks }: { drinks: IOrderItemDrink[] }) => {
         </>
       }
     >
-      <ItemBuilder>
-        <DrinkBuilder
-          drink={drink}
-          orderId={currentOrder ?? ""}
-          addMultipleItems={addMultipleItems}
-        />
-      </ItemBuilder>
+      <ItemBuilderPage>
+        <DrinkBuilder drink={drink} orderId={currentOrder ?? ""} />
+      </ItemBuilderPage>
     </ContrDialog>
   )
 }

@@ -4,8 +4,7 @@ import { FaHotdog } from "react-icons/fa"
 import { RiDrinks2Fill } from "react-icons/ri"
 import { Order } from "./Order"
 import { BottomInfo } from "./BottomInfo"
-import { useHome } from "@/app/context/Home"
-import { useEffect } from "react"
+import { useOrders } from "@/app/context/Orders"
 
 export const OrderList = () => {
   const {
@@ -19,8 +18,8 @@ export const OrderList = () => {
     currentOrder,
     noType,
     createOrder,
-    openOrder,
-  } = useHome()
+    setCurrentOrder,
+  } = useOrders()
 
   // currentOrder?.id ? "max-sm:hidden" : "max-sm:flex-2 max-sm:w-full"
   return (
@@ -40,7 +39,7 @@ export const OrderList = () => {
             color="orange"
             onClick={async () => {
               const order = await createOrder()
-              await openOrder(order)
+              await setCurrentOrder(order.id)
             }}
           >
             Novo Pedido
